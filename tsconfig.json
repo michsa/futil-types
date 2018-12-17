@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "lib": [
+            "es6", "dom"
+        ],
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        // "baseUrl": ".",
+        "typeRoots": [
+            "types"
+        ],
+        // "types": ["futil-js"],
+        "noEmit": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "files": [
+        // "index.d.ts",
+        "futil-js-tests.ts"
+    ],
+    "exclude": [
+        "node_modules", "lodash.js"
+    ]
+}
