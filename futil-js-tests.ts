@@ -2,6 +2,73 @@ import * as F from 'futil-js'
 import * as _ from 'lodash/fp'
 
 const p = (x: any) => console.log(x)
+
+/*
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+================================================================================
+
+    ███████╗██╗   ██╗ ███╗   ██╗  ██████╗████████╗ ██╗  ██████╗  ███╗   ██╗
+    ██╔════╝██║   ██║ ████╗  ██║ ██╔════╝╚══██╔══╝ ██║ ██╔═══██╗ ████╗  ██║
+    █████╗  ██║   ██║ ██╔██╗ ██║ ██║        ██║    ██║ ██║   ██║ ██╔██╗ ██║
+    ██╔══╝  ██║   ██║ ██║╚██╗██║ ██║        ██║    ██║ ██║   ██║ ██║╚██╗██║
+    ██║     ╚██████╔╝ ██║ ╚████║ ╚██████╗   ██║    ██║ ╚██████╔╝ ██║ ╚████║
+    ╚═╝      ╚═════╝  ╚═╝  ╚═══╝  ╚═════╝   ╚═╝    ╚═╝  ╚═════╝  ╚═╝  ╚═══╝
+
+================================================================================
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+/*
+const maybeCall = <T>(fn: (...args: any[]) => T, ...args: any[]) => 
+  _.isFunction(fn) && fn(...args)
+
+  _.isFunction(null)
+*/
+
+// note: maybeCall is NOT auto-curried (thankfully)
+const fun = (x: string, y: number) => ({x: x, y: y})
+const notFun = {a: 1, b: 2} 
+p(F.maybeCall(fun, 'a', 2)) //=> 3
+p(F.maybeCall(fun, 'abc')) //=> 'abc' + null, should type error
+p(F.maybeCall(notFun, 1, 2)) //=> false, args irrelevant
+const a: boolean = F.maybeCall(fun, 'a', 2)
+const b = F.maybeCall(123)
+const c: number = F.maybeCall(fun)
+
+
+p(F.maybeCall2(fun, 'a', 2)) //=> 3
+p(F.maybeCall2(fun, 'abc')) //=> 'abc' + null, should type error
+p(F.maybeCall2(notFun, 1, 2)) //=> false, args irrelevant
+const a2: boolean = F.maybeCall2(fun, 'a', 2)
+const b2 = F.maybeCall2(123)
+const c2: number = F.maybeCall2(fun)
+
+
+const bar = F.argTypes(fun)
+
+// 
+F.maybeFunction("fun")
+F.maybeFunction(fun)
+
+
+F.argTypes(fun)
+
+
+/*
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+================================================================================
+ 
+                 █████╗  ██████╗  ██████╗   █████╗ ██╗   ██╗
+                ██╔══██╗ ██╔══██╗ ██╔══██╗ ██╔══██╗╚██╗ ██╔╝
+                ███████║ ██████╔╝ ██████╔╝ ███████║ ╚████╔╝ 
+                ██╔══██║ ██╔══██╗ ██╔══██╗ ██╔══██║  ╚██╔╝  
+                ██║  ██║ ██║  ██║ ██║  ██║ ██║  ██║   ██║   
+                ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝   ╚═╝   
+ 
+================================================================================
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+
+
 const foo = ['a', 'b', 'a', 0, 'c', 0, {foo: 'bar'}, 1, {foo: 'bar'}]
 
 p(F.dotJoin(foo))
@@ -46,5 +113,7 @@ p(F.mergeRanges([]))                                  //=> []
 // p(F.mergeRanges([u_range, u_range]))               //=> [[undefined, undefined]]
 // p(F.mergeRanges([[null, null], [null, null]]))     //=> [[null, undefined]]
 
-p(F.push('x', foo))
+p(F.push(1, ['a', 'b', 'c']))
 p(F.push('x')(['a', 'b', 'c']))
+p(F.push(null)([]))
+p(F.push('a')([null, 1, 3]))

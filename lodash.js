@@ -1,4 +1,5 @@
 const _ = require('lodash/fp')
+const F = require('futil-js')
 
 const p = (x) => console.log(x)
 const bar = [6, 5, 4, 3, 2, 1]
@@ -19,3 +20,12 @@ const repeated = _.flow(
 foo = [1, 1, null, null, undefined, undefined]
 p(_.groupBy(e => e)(foo))
 p(repeated(foo))
+
+p('maybe call')
+const fun = (x, y) => x + y
+const notFun = {a: 1, b: 2} 
+p(F.maybeCall(fun, 1, 2)) //=> 3
+p(F.maybeCall(fun, 'abc')) //=> 'abc' + null, should type error
+p(F.maybeCall(notFun, 1, 2)) //=> false, args irrelevant
+const maybeCallAdd = F.maybeCall(fun)
+p(maybeCallAdd(4, 5)) //=> 9
