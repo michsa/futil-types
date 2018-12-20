@@ -25,6 +25,9 @@ declare module 'futil-js' {
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
 
+  type Not<T, U> = T extends U ? never : T
+  type MaybeFunction<T, A extends any[], R> = ((...args: A) => R) | Not<T, Function>
+  type MaybeResult<T, R> = T extends Function ? R : false
   /**
 ```
 (fn, a, b) -> fn(a, b)
@@ -32,50 +35,15 @@ declare module 'futil-js' {
    * If `fn` is a function, call the function with the passed-in arguments.
    * Otherwise, return `false`.
    */
-
-  //  export function maybeCall<A, T>(fn: (...args: A[]) => T, ...args: typeof fn extends Function ? A[] : any[]): 
-  //    typeof fn extends Function ? T : boolean
-  //  export function maybeCall<A, T>(fn: any): boolean
-  //  export function maybeCall(...x: any): Function
-
-  // mapped type for args?
-  type Not<T, U> = T extends U ? never : T
-  type ArgTypes<A> = { [K in keyof A]: A[K] }
-
-  export function argTypes<A extends any[]>(fn: (...args: A) => any): A
-
-  //export function maybeFunction<T, A, R>(f: MaybeFunction<T, A, R>): {a: A, r: R}
-  /*
-  type MaybeFunction<T, A, R> = ((...args: A[]) => R) | Not<T, Function>
-  type MaybeArgs<F, A> = F extends Function ? A[] : any[]
-  type MaybeResult<F, R> = F extends Function ? R : false
-  */
-  type MaybeFunction<T, A extends any[], R> = ((...args: A) => R) | Not<T, Function>
-  type MaybeResult<T, R> = T extends Function ? R : false
-
-  // T: return type of MaybeFunction
-  // A: args of maybeFunction
-  //  export function maybeCall<T, A>(fn: (...args: A[]) => T, ...args: (typeof fn extends Function ? A[] : any[])): T
-  
-  /*
-  type Func<A extends any[], T> = (...args: A) => T
-
-  export function maybeCall<A extends any[], T>(fn:  Func<A, T>, ...args: A): T
-  export function maybeCall<T>(fn: Not<T, Function>, ...args: any[]): false
-  */
-
- 
-  type MaybeArgs<F, A extends any[]> = F extends Function ? A : any[]
-
   export function maybeCall<T, A extends any[], R>(fn: MaybeFunction<T, A, R>, ...args: A): MaybeResult<T, R>
-
-  interface MaybeCallable {
-    
-  }
-  
+  /* 
+  // also works, and has less garbage in the type signature, but gives useless
+  // error messages when fn's args don't match the args given to maybeCall.
   export function maybeCall2<A extends any[], R>(fn: (...args: A) => R, ...args: A): R
   export function maybeCall2<T>(fn: Not<T, Function>, ...args: any[]): false
-  
+  */
+
+
   /**
 ```
 (fn, a, b) -> fn(a, b)
@@ -160,10 +128,10 @@ declare module 'futil-js' {
 ```
 joinString -> [string1, string2, ...stringN] -> string1 + joinString + string2 + joinString ... + stringN
 ```
-  * Joins an array after compacting. Note that due to the underlying behavior
-  * of `_.curry` no default `join` value is supported -- you must pass in some
-  * string with which to perform the join.
-  */
+   * Joins an array after compacting. Note that due to the underlying behavior
+   * of `_.curry` no default `join` value is supported -- you must pass in some
+   * string with which to perform the join.
+   */
   export function compactJoin(joinString: string): <T>(array: Compactable<T>) => string
   export function compactJoin<T>(joinString: string, array: Compactable<T>): string
 
@@ -171,19 +139,19 @@ joinString -> [string1, string2, ...stringN] -> string1 + joinString + string2 +
 ```
 [string1, string2, ...stringN] -> string1 + '.' + string2 + '.' ... + stringN
 ```
-  * Compacts and joins an array with `.`
-  */
+   * Compacts and joins an array with `.`
+   */
   export function dotJoin<T>(array: Compactable<T>): string
 
   /**
 ```
 filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.' ... + stringN
 ```
-  * Compacts an array by the provided function, then joins it with `.`
-  * 
-  * Note that because `filterFunction` is passsed to `_.filter`, which caps
-  * iteratees to one argument, it likewise supports one argument only.
-  */
+   * Compacts an array by the provided function, then joins it with `.`
+   * 
+   * Note that because `filterFunction` is passsed to `_.filter`, which caps
+   * iteratees to one argument, it likewise supports one argument only.
+   */
   export function dotJoinWith<T>(filterFunction: (x: T) => boolean | T):
     (xs: _.List<T>) => string
 
@@ -191,13 +159,13 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
 ```
 [a] -> [a]
 ```
-  * Returns an array of elements that are repeated in the input array.
-  * 
-  * Note that `repeated` relies on `_.uniq` to reduce the array of repeated
-  * elements, which uses [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
-  * for equality comparisons. Therefore, the input array may contain only those
-  * types which `SameValueZero` is able to compare for equality.
-  */
+   * Returns an array of elements that are repeated in the input array.
+   * 
+   * Note that `repeated` relies on `_.uniq` to reduce the array of repeated
+   * elements, which uses [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+   * for equality comparisons. Therefore, the input array may contain only those
+   * types which `SameValueZero` is able to compare for equality.
+   */
   export function repeated<T>(xs: _.List<number | string | boolean | symbol | null | undefined>):
     _.List<number | string | boolean | symbol | null | undefined>
 
@@ -205,19 +173,19 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
 ```
 ([[], [], []]) -> [[], []]
 ```
-  * 
-  * Takes any number of ranges and return the result of merging them all.
-  * 
-  * @example [[0,7], [3,9], [11,15]] -> [[0,9], [11,15]]
-  */
+   * 
+   * Takes any number of ranges and return the result of merging them all.
+   * 
+   * @example [[0,7], [3,9], [11,15]] -> [[0,9], [11,15]]
+   */
   export function mergeRanges(ranges: _.List<Range> | null | undefined): _.List<Range>
 
   /**
 ```
 (val, array) -> array
 ```
-  * Return array with val pushed.
-  */
+   * Return array with val pushed.
+   */
   export function push<T>(val: T, array: _.List<T>): _.List<T>
   export function push<T>(val: any, array: _.List<any>): _.List<any>
   export function push(val: any): (array: _.List<any>) => _.List<any>
@@ -226,73 +194,73 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
 ```
 (from, to, array) -> array
 ```
-  * Moves a value from one index to another.
-  */
+   * Moves a value from one index to another.
+   */
   export function moveIndex(...x: any): any
 
   /**
 ```
 [a, b...] -> a -> b
 ```
-  * Creates a function that takes an element of the original array as argument
-  * and returns the next element in the array (with wrapping). Note that (1)
-  * This will return the first element of the array for any argument not in the
-  * array and (2) due to the behavior of `_.curry` the created function will
-  * return a function equivalent to itself if called with no argument.
-  */
+   * Creates a function that takes an element of the original array as argument
+   * and returns the next element in the array (with wrapping). Note that (1)
+   * This will return the first element of the array for any argument not in the
+   * array and (2) due to the behavior of `_.curry` the created function will
+   * return a function equivalent to itself if called with no argument.
+   */
   export function cycle(...x: any): any
 
   /**
 ```
 (k, v, [a]) -> { k(a): v(a) }
 ```
-  * Creates an object from an array by generating a key/value pair for each
-  * element in the array using the key and value mapper functions.
-  */
+   * Creates an object from an array by generating a key/value pair for each
+   * element in the array using the key and value mapper functions.
+   */
   export function arrayToObject(...x: any): any
 
   /**
 ```
 
 ```
-  * A version of _.zipObjectDeep that supports passing a function to determine
-  * values intead of an array, which will be invoked for each key.
-  */
+   * A version of _.zipObjectDeep that supports passing a function to determine
+   * values intead of an array, which will be invoked for each key.
+   */
   export function zipObjectDeepWith(...x: any): any
 
   /**
 ```
 [a, b] -> {a:true, b:true}
 ```
-  * Converts an array of strings into an object mapping to true. Useful for
-  * optimizing `includes`.
-  */
+   * Converts an array of strings into an object mapping to true. Useful for
+   * optimizing `includes`.
+   */
   export function flags(...x: any): any
 
   /**
 ```
 ['a', 'b', 'c'] -> [['a'], ['a', 'b'], ['a', 'b', 'c']]
 ```
-  * Returns a list of all prefixes. Works on strings, too. Implementations must
-  * guarantee that the orginal argument has a length property.
-  */
+   * Returns a list of all prefixes. Works on strings, too. Implementations must
+   * guarantee that the orginal argument has a length property.
+   */
   export function prefixes(...x: any): any
 
   /**
 ```
 string -> {encode: array -> string, decode: string -> array}
 ```
-  * Creates an object with encode and decode functions for encoding arrays as
-  * strings. The input string is used as input for join/split.
-  */
+   * Creates an object with encode and decode functions for encoding arrays as
+   * strings. The input string is used as input for join/split.
+   */
   export function encoder(...x: any): any
 
   /**
 ```
 { encode: ['a', 'b'] -> 'a.b', decode: 'a.b' -> ['a', 'b'] }
 ```
-  * An encoder using `.` as the separator.
-  */
+   * An encoder using `.` as the separator.
+   */
   export function dotEncoder(...x: any): any
 
   /**
