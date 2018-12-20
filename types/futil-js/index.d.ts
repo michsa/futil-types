@@ -25,9 +25,6 @@ declare module 'futil-js' {
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
 
-  type Not<T, U> = T extends U ? never : T
-  type MaybeFunction<T, A extends any[], R> = ((...args: A) => R) | Not<T, Function>
-  type MaybeResult<T, R> = T extends Function ? R : false
   /**
 ```
 (fn, a, b) -> fn(a, b)
@@ -35,15 +32,20 @@ declare module 'futil-js' {
    * If `fn` is a function, call the function with the passed-in arguments.
    * Otherwise, return `false`.
    */
-  export function maybeCall<T, A extends any[], R>(fn: MaybeFunction<T, A, R>, ...args: A): MaybeResult<T, R>
-  /* 
-  // also works, and has less garbage in the type signature, but gives useless
-  // error messages when fn's args don't match the args given to maybeCall.
+  export function maybeCall<T>(fn: T, ...args: InferArgs<T>): ResultOrFalse<T>
+  type ResultOrFalse<T> = T extends (...args: any[]) => infer R ? R : false
+  type InferArgs<T> = T extends (...args: infer A) => any ? A : any[]
+  /*
+  type Not<T, U> = T extends U ? never : T
+  type MaybeFunction<T, A extends any[], R> = ((...args: any) => R) | Not<T, Function>
+  type ResultOrFalse<T, R> = T extends Function ? R : false & {}
+  export function maybeCall1<T, A extends any[], R>(fn: MaybeFunction<T, A, R>, ...args: A):
+    ResultOrFalse<T, R>
+
   export function maybeCall2<A extends any[], R>(fn: (...args: A) => R, ...args: A): R
   export function maybeCall2<T>(fn: Not<T, Function>, ...args: any[]): false
   */
-
-
+  
   /**
 ```
 (fn, a, b) -> fn(a, b)
@@ -51,24 +53,46 @@ declare module 'futil-js' {
    * If `fn` is a function, call the function with the passed-in arguments.
    * Otherwise, return `fn`.
    */
-  export function callOrReturn(...x: any): any
-
+  export function callOrReturn<T>(fn: T, ...args: InferArgs<T>): ResultOrIdentity<T>
+  type ResultOrIdentity<T> = T extends (...args: any[]) => infer R ? R : T
+  
   /**
 ```
 (a, Monoid f) -> f[a] :: f a
 ```
    * Binds a function of an object to its object.
    */
-  export function boundMethod(...x: any): any
+  export function boundMethod<T extends ObjectWithFunction<K>, K extends Key>(fn: K, obj: T): T[K]
+  type Key = string | number | symbol
+  type ObjectWithFunction<F extends Key> = { [k in F]: Function }
 
+  type FunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? K : never }[keyof T]
   /**
 ```
 (f, [g1, g2, ...gn]) -> a -> f([g1(a), g2(a), ...])
 ```
+   * http://ramdajs.com/docs/#converge. Note that `f` is called on the array of
+   * the return values of `[g1, g2, ...gn]` rather than applied to it.
    * 
    * 
    */
-  export function converge(...x: any): any
+  
+  // converger takes an Array<BranchResult>, where the type of each BranchResult
+  // is 
+
+  type Converger<A> = (branchResults: A) => any
+
+  export function converge<C extends Converger<BranchResults<B>>, B extends ((...args: any) => any)[]>(converger: C, branches: B): (...args: any) => any
+   // (...args: BranchArgs<B>) => ConvergerResult<C>
+  
+  // type Converger<A extends any[]> = (...args: A) => any
+  type Branch = (...args: any) => any
+
+  type ConvergerResult<T> = T extends (...args: any[]) => infer R ? R : never
+  type BranchArgs<B> = B extends ((...args: infer A) => any)[] ? A : any[]
+  type BranchResults<B> = B extends ((...args: any) => infer R)[] ? R : any
+
+  //export function converge(...x: any): any
 
   /**
 ```
@@ -110,12 +134,12 @@ declare module 'futil-js' {
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ================================================================================
  
-                 █████╗  ██████╗  ██████╗   █████╗ ██╗   ██╗
-                ██╔══██╗ ██╔══██╗ ██╔══██╗ ██╔══██╗╚██╗ ██╔╝
-                ███████║ ██████╔╝ ██████╔╝ ███████║ ╚████╔╝ 
-                ██╔══██║ ██╔══██╗ ██╔══██╗ ██╔══██║  ╚██╔╝  
-                ██║  ██║ ██║  ██║ ██║  ██║ ██║  ██║   ██║   
-                ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝   ╚═╝   
+                  █████╗  ██████╗  ██████╗   █████╗ ██╗   ██╗
+                 ██╔══██╗ ██╔══██╗ ██╔══██╗ ██╔══██╗╚██╗ ██╔╝
+                 ███████║ █████╔═╝ █████╔═╝ ███████║ ╚████╔╝ 
+                 ██╔══██║ ██╔══██╗ ██╔══██╗ ██╔══██║  ╚██╔╝  
+                 ██║  ██║ ██║  ██║ ██║  ██║ ██║  ██║   ██║   
+                 ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝   ╚═╝   
  
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
