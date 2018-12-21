@@ -10,118 +10,6 @@ declare module 'futil-js' {
 
   import * as lodash from 'lodash'
 
-/*
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-================================================================================
-
-    ███████╗██╗   ██╗ ███╗   ██╗  ██████╗████████╗ ██╗  ██████╗  ███╗   ██╗
-    ██╔════╝██║   ██║ ████╗  ██║ ██╔════╝╚══██╔══╝ ██║ ██╔═══██╗ ████╗  ██║
-    █████╗  ██║   ██║ ██╔██╗ ██║ ██║        ██║    ██║ ██║   ██║ ██╔██╗ ██║
-    ██╔══╝  ██║   ██║ ██║╚██╗██║ ██║        ██║    ██║ ██║   ██║ ██║╚██╗██║
-    ██║     ╚██████╔╝ ██║ ╚████║ ╚██████╗   ██║    ██║ ╚██████╔╝ ██║ ╚████║
-    ╚═╝      ╚═════╝  ╚═╝  ╚═══╝  ╚═════╝   ╚═╝    ╚═╝  ╚═════╝  ╚═╝  ╚═══╝
-
-================================================================================
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-*/
-
-  /**
-```
-(fn, a, b) -> fn(a, b)
-```
-   * If `fn` is a function, call the function with the passed-in arguments.
-   * Otherwise, return `false`.
-   */
-  export function maybeCall<T>(fn: T, ...args: InferArgs<T>): ResultOrFalse<T>
-  type ResultOrFalse<T> = T extends (...args: any[]) => infer R ? R : false
-  type InferArgs<T> = T extends (...args: infer A) => any ? A : any[]
-  /*
-  type Not<T, U> = T extends U ? never : T
-  type MaybeFunction<T, A extends any[], R> = ((...args: any) => R) | Not<T, Function>
-  type ResultOrFalse<T, R> = T extends Function ? R : false & {}
-  export function maybeCall1<T, A extends any[], R>(fn: MaybeFunction<T, A, R>, ...args: A):
-    ResultOrFalse<T, R>
-
-  export function maybeCall2<A extends any[], R>(fn: (...args: A) => R, ...args: A): R
-  export function maybeCall2<T>(fn: Not<T, Function>, ...args: any[]): false
-  */
-  
-  /**
-```
-(fn, a, b) -> fn(a, b)
-```
-   * If `fn` is a function, call the function with the passed-in arguments.
-   * Otherwise, return `fn`.
-   */
-  export function callOrReturn<T>(fn: T, ...args: InferArgs<T>): ResultOrIdentity<T>
-  type ResultOrIdentity<T> = T extends (...args: any[]) => infer R ? R : T
-  
-  /**
-```
-(a, Monoid f) -> f[a] :: f a
-```
-   * Binds a function of an object to its object.
-   */
-  export function boundMethod<T extends ObjectWithFunction<K>, K extends Key>
-      (fn: K, obj: T): T[K]
-  type Key = string | number | symbol
-  type ObjectWithFunction<F extends Key> = { [k in F]: Function }
-
-  /**
-```
-(f, [g1, g2, ...gn]) -> a -> f([g1(a), g2(a), ...gn(a)])
-```
-   * http://ramdajs.com/docs/#converge. Note that `f` is called on the array of
-   * the return values of `[g1, g2, ...gn]` rather than applied to it.
-   * 
-   * This definition correctly generates types for the created function: its
-   * return value matches the return value of the converger function, and its
-   * arguments match the arguments of the strictest branch function. It also
-   * ensures that the converger function accepts an array. 
-   * 
-   * However, it does **not** validate that the converger function's arguments
-   * correctly correspond to the return types of the branch functions, so care
-   * must still be taken to avoid runtime errors.
-   */
-  export function converge<A extends unknown[], T>
-      (converger: (...args: any[]) => T, branches: ((...args: A) => any)[]): 
-          (...args: A) => T
-
-  /**
-```
-(f, g) -> x -> f(g(x))(x)
-```
-   * A combinator that combines `compose` and `apply`. `f` should be a 2 place
-   * curried function. Useful for applying comparisons to pairs defined by some
-   * one place function, e.g. `var isShorterThanFather = F.comply(isTallerThan, fatherOf)`
-   */
-  type ComposeApply = (...x: any) => any
-  export const comply: ComposeApply
-  export const composeApply: ComposeApply
-
-  /**
-   * Implement `defer`, ported from bluebird docs and used by debounceAsync.
-   */
-  export function defer(...x: any): any
-
-  /**
-   * A `_.debounce` for async functions that ensure the returned promise is
-   * resolved with the result of the execution of the actual call. Using 
-   * `_.debounce` with `await` or `.then` would result in the earlier calls
-   * never returning because they're not executed - the unit tests demonstate
-   * it failing with `_.debounce`.
-   */
-  export function debounceAsync(...x: any): any
-
-  /**
-```
-(f1, f2, ...fn) -> f1Arg1 -> f1Arg2 -> ...f1ArgN -> fn(f2(f1))
-```
-   * Flurry is combo of `flow` + `curry`, preserving the arity of the initial
-   * function. See https://github.com/lodash/lodash/issues/3612.
-   */
-  export function flurry(...x: any): any
-
 
 /*
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -158,6 +46,7 @@ joinString -> [string1, string2, ...stringN] -> string1 + joinString + string2 +
    */
   export function dotJoin<T>(array: Compactable<T>): string
 
+
   /**
 ```
 filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.' ... + stringN
@@ -170,6 +59,7 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
   export function dotJoinWith<T>(filterFunction: (x: T) => boolean | T):
       (xs: _.List<T>) => string
 
+  
   /**
 ```
 [a] -> [a]
@@ -184,6 +74,7 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
   export function repeated<T>(xs: _.List<Uniqable>): _.List<Uniqable>
   type Uniqable = number | string | boolean | symbol | null | undefined
 
+
   /**
 ```
 ([[], [], []]) -> [[], []]
@@ -197,6 +88,7 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
       _.List<NumberRange>
   type NumberRange = [number, number]
 
+
   /**
 ```
 (val, array) -> array
@@ -207,6 +99,7 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
   export function push<T>(val: any, array: _.List<any>): _.List<any>
   export function push(val: any): (array: _.List<any>) => _.List<any>
 
+
   /**
 ```
 (from, to, array) -> array
@@ -214,6 +107,7 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * Moves a value from one index to another.
    */
   export function moveIndex(...x: any): any
+
 
   /**
 ```
@@ -327,67 +221,571 @@ f -> array -> [array[0], f(), array[n], ....)
    * a function, it will treat `f` as the value to intersperse. See
    * https://ramdajs.com/docs/#intersperse.
    * 
-   * **Note:** Intersperse can be used with JSX components! Specially with the
-   * `differentLast` iterator:
-   * 
-   * Example with words (`toSentence` is basically this flowed into a `_.join('')`): 
-```
-F.intersperse(differentLast(() => 'or', () => 'or perhaps'), ['first', 'second', 'third'])
-//=> ['first', 'or', 'second', 'or perhaps', 'third']
-```
-   * Example with React and JSX:
-```
-let results = [1, 2, 3]
-return <div>
-  <b>Results:</b>
-  <br/>
-  {
-    _.flow(
-      _.map(x => <b>{x}</b>),
-      F.intersperse(F.differentLast(() => ', ', () => ' and '))
-    )(results)
-  }
-</div>
-```
-   * Output:
-   * > **Results:**
-   * >
-   * > **1**, **2** and **3**.
-   * 
+   * **Note:** `intersperse` can be used with JSX components! To see an example,
+   * please check the official documentation at https://github.com/smartprocure/futil-js#intersperse.
    */
   export function intersperse(...x: any): any
+
+/*
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+================================================================================
+
+              █████╗   ██████╗ ██████╗  ███████╗  ██████╗████████╗
+             ██╔══██╗ ██╔════╝ ██╔══██╗ ██╔════╝ ██╔════╝╚══██╔══╝
+             ███████║ ╚█████═╗ ██████╔╝ █████╗   ██║        ██║   
+             ██╔══██║  ╚═══██║ ██╔═══╝  ██╔══╝   ██║        ██║   
+             ██║  ██║ ██████╔╝ ██║      ███████╗ ╚██████╗   ██║   
+             ╚═╝  ╚═╝ ╚═════╝  ╚═╝      ╚══════╝  ╚═════╝   ╚═╝   
+
+================================================================================
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+
+  // export function aspect
+
+  // export function aspectSync
+
+  // export function aspects
 
 
 /*
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ================================================================================
 
-              ██████╗  ██████╗      ██╗ ███████╗ ██████╗████████╗
-             ██╔═══██╗ ██╔══██╗     ██║ ██╔════╝██╔════╝╚══██╔══╝
-             ██║   ██║ ██████╔╝     ██║ █████╗  ██║        ██║   
-             ██║   ██║ ██╔══██╗██   ██║ ██╔══╝  ██║        ██║   
-             ╚██████╔╝ ██████╔╝╚█████╔╝ ███████╗╚██████╗   ██║   
-              ╚═════╝  ╚═════╝  ╚════╝  ╚══════╝ ╚═════╝   ╚═╝   
+ █████╗  █████╗  ██╗     ██╗     ██████╗  █████╗████████╗ ██╗  █████╗  ███╗  ██╗
+██╔═══╝ ██╔══██╗ ██║     ██║     ██╔═══╝ ██╔═══╝╚══██╔══╝ ██║ ██╔══██╗ ████╗ ██║
+██║     ██║  ██║ ██║     ██║     ████╗   ██║       ██║    ██║ ██║  ██║ ██╔██╗██║
+██║     ██║  ██║ ██║     ██║     ██╔═╝   ██║       ██║    ██║ ██║  ██║ ██║╚████║
+╚█████╗ ╚█████╔╝ ██████╗ ██████╗ ██████╗ ╚█████╗   ██║    ██║ ╚█████╔╝ ██║ ╚███║
+ ╚════╝  ╚════╝  ╚═════╝ ╚═════╝ ╚═════╝  ╚════╝   ╚═╝    ╚═╝  ╚════╝  ╚═╝  ╚══╝
+
+================================================================================
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+
+  // export function flowMap
+
+  // export function findApply
+
+
+  // Algebras
+  // ----------
+
+  // export function map
+
+  // export function deepMap
+
+  // export function insertAtIndex
+
+
+/*
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+================================================================================
+
+ █████╗ █████╗  ██╗  ██╗ ██╗  ██╗ ██████╗ █████╗   █████╗ ██╗  █████╗  ██╗  ██╗
+██╔═══╝██╔══██╗ ███╗ ██║ ██║  ██║ ██╔═══╝ ██╔═██╗ ██╔═══╝ ██║ ██╔══██╗ ███╗ ██║
+██║    ██║  ██║ ████╗██║ ██║  ██║ ████╗   ████╔═╝ ╚████═╗ ██║ ██║  ██║ ████╗██║
+██║    ██║  ██║ ██╔████║ ╚██╗██╔╝ ██╔═╝   ██╔═██╗  ╚══██║ ██║ ██║  ██║ ██╔████║
+╚█████╗╚█████╔╝ ██║╚███║  ╚███╔╝  ██████╗ ██║ ██║ █████╔╝ ██║ ╚█████╔╝ ██║╚███║
+ ╚════╝ ╚════╝  ╚═╝ ╚══╝   ╚══╝   ╚═════╝ ╚═╝ ╚═╝ ╚════╝  ╚═╝  ╚════╝  ╚═╝ ╚══╝
+      
+================================================================================
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+
+  // Flips
+  // ----------
+
+  // export function getIn
+
+  // export function hasIn
+
+  // export function pickIn
+
+  // export function includesIn
+
+  // export function inversions
+
+
+  // Mutables
+  // ----------
+
+  // export function extendOn
+
+  // export function defaultsOn
+
+  // export function mergeOn
+
+  // export function setOn
+
+  // export function unsetOn
+
+  // export function pullOn
+
+  // export function updateOn
+
+
+  // Uncaps
+  // ----------
+
+  // export function reduce
+
+  // export function mapValues
+
+  // export function each
+
+  // export function mapIndexed
+
+  // export function findIndexed
+
+  // export function eachIndexed
+
+  // export function reduceIndexed
+
+  // export function pickByIndexed
+
+  // export function mapValuesIndexed
+
+
+/*
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+================================================================================
+
+    ███████╗██╗   ██╗ ███╗   ██╗  ██████╗████████╗ ██╗  ██████╗  ███╗   ██╗
+    ██╔════╝██║   ██║ ████╗  ██║ ██╔════╝╚══██╔══╝ ██║ ██╔═══██╗ ████╗  ██║
+    █████╗  ██║   ██║ ██╔██╗ ██║ ██║        ██║    ██║ ██║   ██║ ██╔██╗ ██║
+    ██╔══╝  ██║   ██║ ██║╚██╗██║ ██║        ██║    ██║ ██║   ██║ ██║╚██╗██║
+    ██║     ╚██████╔╝ ██║ ╚████║ ╚██████╗   ██║    ██║ ╚██████╔╝ ██║ ╚████║
+    ╚═╝      ╚═════╝  ╚═╝  ╚═══╝  ╚═════╝   ╚═╝    ╚═╝  ╚═════╝  ╚═╝  ╚═══╝
+
+================================================================================
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+
+  /**
+```
+(fn, a, b) -> fn(a, b)
+```
+   * If `fn` is a function, call the function with the passed-in arguments.
+   * Otherwise, return `false`.
+   */
+  export function maybeCall<T>(fn: T, ...args: InferArgs<T>): ResultOrFalse<T>
+  type ResultOrFalse<T> = T extends (...args: any[]) => infer R ? R : false
+  type InferArgs<T> = T extends (...args: infer A) => any ? A : any[]
+  
+
+  /**
+```
+(fn, a, b) -> fn(a, b)
+```
+   * If `fn` is a function, call the function with the passed-in arguments.
+   * Otherwise, return `fn`.
+   */
+  export function callOrReturn<T>(fn: T, ...args: InferArgs<T>): ResultOrIdentity<T>
+  type ResultOrIdentity<T> = T extends (...args: any[]) => infer R ? R : T
+  
+
+  /**
+```
+(a, Monoid f) -> f[a] :: f a
+```
+   * Binds a function of an object to its object.
+   */
+  export function boundMethod<T extends ObjectWithFunction<K>, K extends Key>
+      (fn: K, obj: T): T[K]
+  type Key = string | number | symbol
+  type ObjectWithFunction<F extends Key> = { [k in F]: Function }
+
+
+  /**
+```
+(f, [g1, g2, ...gn]) -> a -> f([g1(a), g2(a), ...gn(a)])
+```
+   * http://ramdajs.com/docs/#converge. Note that `f` is called on the array of
+   * the return values of `[g1, g2, ...gn]` rather than applied to it.
+   * 
+   * This definition correctly generates types for the created function: its
+   * return value matches the return value of the converger function, and its
+   * arguments match the arguments of the strictest branch function. It also
+   * ensures that the converger function accepts an array. 
+   * 
+   * However, it does **not** validate that the converger function's arguments
+   * correctly correspond to the return types of the branch functions, so care
+   * must still be taken to avoid runtime errors from mismatched functions.
+   */
+  export function converge<A extends unknown[], R>
+      (converger: (...args: any[]) => R, branches: ((...args: A) => any)[]): 
+          (...args: A) => R
+
+
+  /**
+```
+(f, g) -> x -> f(g(x))(x)
+```
+   * A combinator that combines `compose` and `apply`. `f` should be a 2 place
+   * curried function. Useful for applying comparisons to pairs defined by some
+   * one place function, e.g. `var isShorterThanFather = F.comply(isTallerThan, fatherOf)`
+   */
+  export function composeApply(...args: any[]): (...args: any[]) => any
+
+  /**
+```
+(f, g) -> x -> f(g(x))(x)
+```
+   * Alias of `composeApply`.
+   */
+  export const comply: typeof composeApply
+
+
+  /**
+   * Implement `defer`, ported from bluebird docs and used by debounceAsync.
+   */
+  export function defer(...x: any): any
+
+
+  /**
+   * A `_.debounce` for async functions that ensure the returned promise is
+   * resolved with the result of the execution of the actual call. Using 
+   * `_.debounce` with `await` or `.then` would result in the earlier calls
+   * never returning because they're not executed - the unit tests demonstate
+   * it failing with `_.debounce`.
+   */
+  export function debounceAsync(...x: any): any
+
+
+  /**
+```
+(f1, f2, ...fn) -> f1Arg1 -> f1Arg2 -> ...f1ArgN -> fn(f2(f1))
+```
+   * Flurry is combo of `flow` + `curry`, preserving the arity of the initial
+   * function. See https://github.com/lodash/lodash/issues/3612.
+   */
+  export function flurry(...x: any): any
+
+
+
+/*
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+================================================================================
+
+  ██╗ ████████╗ ███████╗ ██████╗   █████╗ ████████╗ ██████╗  ██████╗   ██████╗
+  ██║ ╚══██╔══╝ ██╔════╝ ██╔══██╗ ██╔══██╗╚══██╔══╝██╔═══██╗ ██╔══██╗ ██╔════╝
+  ██║    ██║    █████╗   █████╔═╝ ███████║   ██║   ██║   ██║ █████╔═╝ ╚█████═╗
+  ██║    ██║    ██╔══╝   ██╔══██╗ ██╔══██║   ██║   ██║   ██║ ██╔══██╗  ╚═══██║
+  ██║    ██║    ███████╗ ██║  ██║ ██║  ██║   ██║   ╚██████╔╝ ██║  ██║ ██████╔╝
+  ╚═╝    ╚═╝    ╚══════╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝   ╚═╝    ╚═════╝  ╚═╝  ╚═╝ ╚═════╝
+                                                                      
+================================================================================
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+
+  // export function differentLast
+
+/*
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+================================================================================
+                                                        
+                     ██╗      █████╗  ███╗   ██╗  ██████╗ 
+                     ██║     ██╔══██╗ ████╗  ██║ ██╔════╝ 
+                     ██║     ███████║ ██╔██╗ ██║ ██║  ███╗
+                     ██║     ██╔══██║ ██║╚██╗██║ ██║   ██║
+                     ███████╗██║  ██║ ██║ ╚████║ ╚██████╔╝
+                     ╚══════╝╚═╝  ╚═╝ ╚═╝  ╚═══╝  ╚═════╝ 
+                                                      
+================================================================================
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+
+  // export function throws
+  
+  // export function tapError
+  
+  // export function exists (alias: isNotNil)
+  
+  // export function isMultiple
+  
+  // export function append
+  
+  // export function isBlank
+  
+  // export function isNotBlank
+  
+  // export function isBlankDeep
+
+/*
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+================================================================================
+
+                      ██╗     ███████╗ ███╗   ██╗  ██████╗
+                      ██║     ██╔════╝ ████╗  ██║ ██╔════╝
+                      ██║     █████╗   ██╔██╗ ██║ ╚█████═╗
+                      ██║     ██╔══╝   ██║╚██╗██║  ╚═══██║
+                      ███████╗███████╗ ██║ ╚████║ ██████╔╝
+                      ╚══════╝╚══════╝ ╚═╝  ╚═══╝ ╚═════╝
+                                  
+================================================================================
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+
+  // export function functionLens
+  
+  // export function objectLens
+  
+  // export function fnToObj
+  
+  // export function objToFn
+  
+  // export function lensProp
+  
+  // export function lensOf
+  
+  // export function includeLens
+  
+  // export function view
+  
+  // export function views
+  
+  // export function set
+  
+  // export function sets
+  
+  // export function setsWith
+  
+  // export function flip
+  
+  // export function on
+  
+  // export function off
+  
+  // export function domLens
+
+/*
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+================================================================================
+
+                    ██╗      ██████╗   ██████╗  ██╗  ██████╗
+                    ██║     ██╔═══██╗ ██╔════╝  ██║ ██╔════╝
+                    ██║     ██║   ██║ ██║  ███╗ ██║ ██║     
+                    ██║     ██║   ██║ ██║   ██║ ██║ ██║     
+                    ███████╗╚██████╔╝ ╚██████╔╝ ██║ ╚██████╗
+                    ╚══════╝ ╚═════╝   ╚═════╝  ╚═╝  ╚═════╝
+                                     
+================================================================================
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+
+  // export function ifElse
+  
+  // export function when
+  
+  // export function unless
+  
+  // export function whenExists
+  
+  // export function whenTruthy
+
+/*
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+================================================================================
+
+               ██████╗  ██████╗      ██╗ ███████╗ ██████╗████████╗
+              ██╔═══██╗ ██╔══██╗     ██║ ██╔════╝██╔════╝╚══██╔══╝
+              ██║   ██║ ██████╔╝     ██║ █████╗  ██║        ██║   
+              ██║   ██║ ██╔══██╗██   ██║ ██╔══╝  ██║        ██║   
+              ╚██████╔╝ ██████╔╝╚█████╔╝ ███████╗╚██████╗   ██║   
+               ╚═════╝  ╚═════╝  ╚════╝  ╚══════╝ ╚═════╝   ╚═╝   
 
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 */
 
-  /**
-```
+  // export function singleObject
+  
+  // export function singleObjectR
+  
+  // export function chunkObject
+  
+  // export function compactObject
+  
+  // export function isEmptyObject
+  
+  // export function isNotEmptyObject
+  
+  // export function stripEmptyObjects
+  
+  // export function pickInto
+  
+  // export function renameProperty
+  
+  // export function unwind
+  
+  // export function isFlatObject
+  
+  // export function flattenObject
+  
+  // export function unflattenObject
+  
+  // export function matchesSignature
+  
+  // export function matchesSome
+  
+  // export function compareDeep
+  
+  // export function mapProp
+  
+  // export function getOrReturn
+  
+  // export function alias
+  
+  // export function aliasIn
+  
+  // export function cascade
+  
+  // export function cascadeIn
+  
+  // export function cascadeKey
+  
+  // export function cascadePropKey
+  
+  // export function cascadeProp
+  
+  // export function unkeyBy
+  
+  // export function simpleDiff
+  
+  // export function simpleDiffArray
+  
+  // export function diff
+  
+  // export function diffArray
+  
+  // export function pickOn
+  
+  // export function mergeAllArrays
+  
+  // export function invertByArray
+  
+  // export function stampKey
 
-```
-   * 
-   */
-  export function fn(...x: any): any
 
-  /**
-```
+/*
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+================================================================================
 
-```
-   * 
-   */
-  export function fn(...x: any): any
+                 ██████╗  ███████╗  ██████╗  ███████╗ ██╗  ██╗
+                 ██╔══██╗ ██╔════╝ ██╔════╝  ██╔════╝ ╚██╗██╔╝
+                 █████╔═╝ █████╗   ██║  ███╗ █████╗    ╚███╔╝ 
+                 ██╔══██╗ ██╔══╝   ██║   ██║ ██╔══╝    ██╔██╗ 
+                 ██║  ██║ ███████╗ ╚██████╔╝ ███████╗ ██╔╝ ██╗
+                 ╚═╝  ╚═╝ ╚══════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═╝
+                                         
+================================================================================
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+
+  // export function testRegex
+
+  // export function makeRegex
+
+  // export function makeAndTest
+
+  // export function matchAllWords
+
+  // export function matchAnyWord
+
+  // export function allMatches
+
+  // export function postings
+
+  // export function postingsForWords
+
+  // export function highlightFromPostings
+
+  // export function highlight
+
+/*
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+================================================================================
+
+               ██████╗████████╗ ██████╗  ██╗ ███╗   ██╗  ██████╗ 
+              ██╔════╝╚══██╔══╝ ██╔══██╗ ██║ ████╗  ██║ ██╔════╝ 
+              ╚█████═╗   ██║    █████╔═╝ ██║ ██╔██╗ ██║ ██║  ███╗
+               ╚═══██║   ██║    ██╔══██╗ ██║ ██║╚██╗██║ ██║   ██║
+              ██████╔╝   ██║    ██║  ██║ ██║ ██║ ╚████║ ╚██████╔╝
+              ╚═════╝    ╚═╝    ╚═╝  ╚═╝ ╚═╝ ╚═╝  ╚═══╝  ╚═════╝ 
+                                               
+================================================================================
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+
+  // export function wrap
+
+  // export function quote
+
+  // export function parens
+
+  // export function concatStrings
+  
+  // export function trimStrings
+
+  // export function autoLabel
+
+  // export function autoLabelOption
+
+  // export function autoLabelOptions
+
+  // export function toSentenceWith
+
+  // export function toSentence
+
+
+/*
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+================================================================================
+
+                     ████████╗██████╗  ███████╗ ███████╗
+                     ╚══██╔══╝██╔══██╗ ██╔════╝ ██╔════╝
+                        ██║   █████╔═╝ █████╗   █████╗  
+                        ██║   ██╔══██╗ ██╔══╝   ██╔══╝  
+                        ██║   ██║  ██║ ███████╗ ███████╗
+                        ╚═╝   ╚═╝  ╚═╝ ╚══════╝ ╚══════╝
+                                 
+================================================================================
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+*/
+
+  // export function isTraversable
+
+  // export function traverse
+
+  // export function walk
+
+  // export function transformTree
+
+  // export function reduceTree
+
+  // export function treeToArrayBy
+
+  // export function treeToArray
+
+  // export function leaves
+
+  // export function treeLookup
+
+  // export function keyTreeByWith
+
+  // Flat Tree
+  // export function treeKeys
+
+  // export function treeValues
+
+  // export function treePath
+
+  // export function flattenTree
+
+  // export function flatLeaves
+
+  // export function tree
 
 }
