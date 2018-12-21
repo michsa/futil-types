@@ -43,6 +43,7 @@ const bigHeader = (name: string) => {
 bigHeader('function')
 
 header('maybeCall')
+// ----------------
 
 // note: maybeCall is NOT auto-curried (thankfully)
 const fun = (x: string, y: number) => y < 10 ? x.repeat(y) : y
@@ -56,11 +57,17 @@ const typedFunResult: string | number = funResultImplicit
 p(typedFunResult)
 const notFunResult: boolean = F.maybeCall(123)
 
+
 header('callOrReturn')
+// -------------------
 
 p(F.callOrReturn(fun, 'five times the fun! ', 5))
 const notFunAgain: typeof notFun = F.callOrReturn(notFun)
 p(notFunAgain)
+
+
+header('boundMethod')
+// ------------------
 
 let obj = {
   name: 'Wade Watts',
@@ -71,9 +78,6 @@ let obj = {
     return `Welcome to ${place}, ${this.name}!`
   }
 }
-
-header('boundMethod')
-
 p(obj.greet.call({ name: 'John Henry' }, 40))
 const bound1 = F.boundMethod('greet', obj)
 p(bound1(11)) // should error here if arguments missing or incorrect
@@ -81,18 +85,30 @@ p(obj[1].call({ name: 'futil-js' }, 'TypeScript'))
 const bound2 = F.boundMethod(1, obj)
 p(bound2('Yharnam'))
 
+
 header('converge')
+// ---------------
 
-//_.repeat(1)('a')
-
-const strangeConcat = F.converge(_.concat, [_.toLower, _.toUpper])
+const strangeConcat = F.converge(_.join(''), [_.toLower, _.toUpper])
 p(strangeConcat('Yodel'))
 
 const sum = ([a, b]: number[]) => a + b
+const sumOfMaxAndMin = F.converge(sum, [Math.max, Math.min])
+p(sumOfMaxAndMin(1, 2, 3, 4))
 
-p(F.converge(sum, [Math.max, Math.min.toString])(1, 2, 3, 4))
+const sayType = (x: string | number) => `'${x}' is a ${typeof x}`
+const isGt5 = (x: number) => x > 5
+const isNumber = (x: string | number) => typeof x === 'number'
 
+const uppercaseIfTrue = ([s, b]: [string, boolean]) => b ? _.upperCase(s) : s
 
+const shoutTypeIfNumber = F.converge(uppercaseIfTrue, [sayType, isNumber])
+p(shoutTypeIfNumber('shhhh'))
+p(shoutTypeIfNumber(8))
+const shoutTypeIfGt5 = F.converge(uppercaseIfTrue, [sayType, isGt5])
+// p(shoutTypeIfGt5('yep')) // should throw compile error
+p(shoutTypeIfGt5(4))
+p(shoutTypeIfGt5(8))
 
 /*
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

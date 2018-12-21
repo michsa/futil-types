@@ -77,22 +77,54 @@ declare module 'futil-js' {
    * 
    */
   
-  // converger takes an Array<BranchResult>, where the type of each BranchResult
-  // is 
+  // 
+  
+  
+  /* 
+  Branches: array of Branch
+  Branch: (...args: any) => BranchResults[i]
 
-  type Converger<A> = (branchResults: A) => any
+  BranchResults: tuple with the return value of each branch argument
+  R: return value of the converger function
 
-  export function converge<C extends Converger<BranchResults<B>>, B extends ((...args: any) => any)[]>(converger: C, branches: B): (...args: any) => any
+  Converger<BranchResults>(a: BranchResults) => R
+
+  converge(c: Converger<BranchResults, R>, branches: ???)
+  */
+  
+  type Function<A extends any[], R> = (...args: A) => R
+
+  export function converge<A extends unknown[], T>(converger: (...args: any[]) => T, branches: ((...args: A) => any)[]): (...args: A) => T
+/*
+  type Converger<A extends any[]> = ([branchResults]: BranchResults<A>) => any
+  type InferBranchResults<C> = C extends (...args: infer A) => any ? (...args: any) => A : never
+
+  export function converge3<B>(converger: any, ...rest: [B]): any
+
+  export function converge2<B extends any[]>(converger: InferConvergerArgs<B>, branches: B): any
+  type InferConvergerArgs<B> = B extends ((...args: any[]) => infer R) ? R : any
+
+  export function converge<C>(converger: C, branches: InferBranchResults<C>): (...args: any) => any
    // (...args: BranchArgs<B>) => ConvergerResult<C>
+
+  type ConvergeBranch<Rs> = (...args: any) => Rs
   
   // type Converger<A extends any[]> = (...args: A) => any
   type Branch = (...args: any) => any
 
   type ConvergerResult<T> = T extends (...args: any[]) => infer R ? R : never
   type BranchArgs<B> = B extends ((...args: infer A) => any)[] ? A : any[]
-  type BranchResults<B> = B extends ((...args: any) => infer R)[] ? R : any
+
+  // B is an array of branch functions
+  type BranchResults<B> = B extends ((...args: any) => infer R)[] ? R[] : never
+  // B is a single branch function
+  type BranchResult<B> = B extends (...args: any) => infer R ? R : never
 
   //export function converge(...x: any): any
+
+  // branches: array of functions where 
+  // infer parameters of converger function from results of each function in branches array
+*/
 
   /**
 ```
