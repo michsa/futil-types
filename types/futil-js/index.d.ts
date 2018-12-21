@@ -62,69 +62,30 @@ declare module 'futil-js' {
 ```
    * Binds a function of an object to its object.
    */
-  export function boundMethod<T extends ObjectWithFunction<K>, K extends Key>(fn: K, obj: T): T[K]
+  export function boundMethod<T extends ObjectWithFunction<K>, K extends Key>
+      (fn: K, obj: T): T[K]
   type Key = string | number | symbol
   type ObjectWithFunction<F extends Key> = { [k in F]: Function }
 
-  type FunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? K : never }[keyof T]
   /**
 ```
-(f, [g1, g2, ...gn]) -> a -> f([g1(a), g2(a), ...])
+(f, [g1, g2, ...gn]) -> a -> f([g1(a), g2(a), ...gn(a)])
 ```
    * http://ramdajs.com/docs/#converge. Note that `f` is called on the array of
    * the return values of `[g1, g2, ...gn]` rather than applied to it.
    * 
+   * This definition correctly generates types for the created function: its
+   * return value matches the return value of the converger function, and its
+   * arguments match the arguments of the strictest branch function. It also
+   * ensures that the converger function accepts an array. 
    * 
+   * However, it does **not** validate that the converger function's arguments
+   * correctly correspond to the return types of the branch functions, so care
+   * must still be taken to avoid runtime errors.
    */
-  
-  // 
-  
-  
-  /* 
-  Branches: array of Branch
-  Branch: (...args: any) => BranchResults[i]
-
-  BranchResults: tuple with the return value of each branch argument
-  R: return value of the converger function
-
-  Converger<BranchResults>(a: BranchResults) => R
-
-  converge(c: Converger<BranchResults, R>, branches: ???)
-  */
-  
-  type Function<A extends any[], R> = (...args: A) => R
-
-  export function converge<A extends unknown[], T>(converger: (...args: any[]) => T, branches: ((...args: A) => any)[]): (...args: A) => T
-/*
-  type Converger<A extends any[]> = ([branchResults]: BranchResults<A>) => any
-  type InferBranchResults<C> = C extends (...args: infer A) => any ? (...args: any) => A : never
-
-  export function converge3<B>(converger: any, ...rest: [B]): any
-
-  export function converge2<B extends any[]>(converger: InferConvergerArgs<B>, branches: B): any
-  type InferConvergerArgs<B> = B extends ((...args: any[]) => infer R) ? R : any
-
-  export function converge<C>(converger: C, branches: InferBranchResults<C>): (...args: any) => any
-   // (...args: BranchArgs<B>) => ConvergerResult<C>
-
-  type ConvergeBranch<Rs> = (...args: any) => Rs
-  
-  // type Converger<A extends any[]> = (...args: A) => any
-  type Branch = (...args: any) => any
-
-  type ConvergerResult<T> = T extends (...args: any[]) => infer R ? R : never
-  type BranchArgs<B> = B extends ((...args: infer A) => any)[] ? A : any[]
-
-  // B is an array of branch functions
-  type BranchResults<B> = B extends ((...args: any) => infer R)[] ? R[] : never
-  // B is a single branch function
-  type BranchResult<B> = B extends (...args: any) => infer R ? R : never
-
-  //export function converge(...x: any): any
-
-  // branches: array of functions where 
-  // infer parameters of converger function from results of each function in branches array
-*/
+  export function converge<A extends unknown[], T>
+      (converger: (...args: any[]) => T, branches: ((...args: A) => any)[]): 
+          (...args: A) => T
 
   /**
 ```
@@ -177,9 +138,6 @@ declare module 'futil-js' {
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
 
-  type Compactable<T> = _.List<T | null | undefined | false | '' | 0> | null | undefined
-  type Range = [number, number]
-
   /**
 ```
 joinString -> [string1, string2, ...stringN] -> string1 + joinString + string2 + joinString ... + stringN
@@ -190,6 +148,7 @@ joinString -> [string1, string2, ...stringN] -> string1 + joinString + string2 +
    */
   export function compactJoin(joinString: string): <T>(array: Compactable<T>) => string
   export function compactJoin<T>(joinString: string, array: Compactable<T>): string
+  type Compactable<T> = _.List<T | null | undefined | false | '' | 0> | null | undefined
 
   /**
 ```
@@ -209,7 +168,7 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * iteratees to one argument, it likewise supports one argument only.
    */
   export function dotJoinWith<T>(filterFunction: (x: T) => boolean | T):
-    (xs: _.List<T>) => string
+      (xs: _.List<T>) => string
 
   /**
 ```
@@ -222,8 +181,8 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * for equality comparisons. Therefore, the input array may contain only those
    * types which `SameValueZero` is able to compare for equality.
    */
-  export function repeated<T>(xs: _.List<number | string | boolean | symbol | null | undefined>):
-    _.List<number | string | boolean | symbol | null | undefined>
+  export function repeated<T>(xs: _.List<Uniqable>): _.List<Uniqable>
+  type Uniqable = number | string | boolean | symbol | null | undefined
 
   /**
 ```
@@ -234,7 +193,9 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * 
    * @example [[0,7], [3,9], [11,15]] -> [[0,9], [11,15]]
    */
-  export function mergeRanges(ranges: _.List<Range> | null | undefined): _.List<Range>
+  export function mergeRanges(ranges: _.List<NumberRange> | null | undefined): 
+      _.List<NumberRange>
+  type NumberRange = [number, number]
 
   /**
 ```
