@@ -426,7 +426,8 @@ f -> array -> [array[0], f(), array[n], ....)
    * curried function. Useful for applying comparisons to pairs defined by some
    * one place function, e.g. `var isShorterThanFather = F.comply(isTallerThan, fatherOf)`
    */
-  export function composeApply(...args: any[]): (...args: any[]) => any
+  export function composeApply<Ag extends any[], Rg, Rf>
+    (f: (arg: Rg) => (...args: Ag) => Rf, g: (...args: Ag) => Rg): (...x: Ag) => Rf
 
   /**
 ```
@@ -504,8 +505,22 @@ f -> array -> [array[0], f(), array[n], ....)
   
   // export function isMultiple
   
-  // export function append
-  
+  /**
+   * A curried, flipped `_.add`. The flipping matters for strings, e.g. 
+   * `F.append('a')('b') -> 'ba'`
+   * 
+   * The type definition follows the [TypeScript specification for the binary `+`
+   * operator](https://github.com/Microsoft/TypeScript/blob/master/doc/spec.md#4.19.2),
+   * which is what `append` uses internally. In short, a `number` type for *both*
+   * arguments will return a `number`, a `string` type for *either* argument will
+   * return a `string`, and any other combination returns `any`.
+   */
+  export function append(toAppend: number): <T>(appendee: T) => MatchNumberOrString<T>
+  export function append(toAppend: string): (appendee: any) => string
+  export function append(toAppend: any): <T>(appendee: T) => MatchString<T>
+  type MatchNumberOrString<T> = T extends number ? number : MatchString<T>
+  type MatchString<T> = T extends string ? string : any
+
   // export function isBlank
   
   // export function isNotBlank

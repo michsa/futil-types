@@ -4,7 +4,7 @@ import * as _ from 'lodash/fp'
 // utilities for pretty printing
 // -----------------------------
 
-const p = (x: any) => console.log(x)
+const p = (...x: any[]) => console.log(...x)
 
 const separator = (char: string) => (length: number) => (first: string, last?: string) => 
   `${first}${char.repeat(length)}${last ? last : first}`
@@ -44,13 +44,13 @@ bigHeader('array')
 const foo = ['a', 'b', 'a', 0, 'c', 0, {foo: 'bar'}, 1, {foo: 'bar'}]
 
 header('dotJoin')
-// ----------------
+// --------------
 
 p(F.dotJoin(foo))
 
 
 header('compactJoin')
-// ----------------
+// ------------------
 
 const slashJoin = F.compactJoin('/')
 slashJoin(foo)
@@ -61,7 +61,7 @@ p(tildeJoin(foo))
 
 
 header('dotJoinWith')
-// ----------------
+// ------------------
 
 // when we curry dotJoinWith, we generate a function that takes a
 // collection. this collection's type signature should depend on the
@@ -76,13 +76,13 @@ p(dotJoinWithA('abcdeasadagege'))
 
 
 header('repeated')
-// ----------------
+// ---------------
 
 p(F.repeated([1, null, undefined]))
 
 
 header('mergeRanges')
-// ----------------
+// ------------------
 
 // mergeRanges behaves somewhat unpredictably with null or empty ranges.
 // those commented out are disallowed in the definition.
@@ -103,7 +103,7 @@ p(F.mergeRanges([]))                                  //=> []
 
 
 header('push')
-// ----------------
+// -----------
 
 p(F.push(1, ['a', 'b', 'c']))
 p(F.push('x')(['a', 'b', 'c']))
@@ -358,10 +358,27 @@ const spookier: string = doubleRepeatFromArray(['Oo', 3])
 p(spooky + spookier)
 
 
-header('comply')
-// ---------------
+header('composeApply / comply')
+// ----------------------------
 
-// F.comply(F.append, x => x * 2)(5)
+const timesTwo = (x: number) => x * 2
+const timesThree = F.comply(F.append, timesTwo)
+const fifteen: number = timesThree(5)
+p(fifteen, typeof fifteen)
+
+interface Fairy {
+  height: number, // (in centimeters)
+  father?: Fairy
+}
+const isTallerThan = (a?: Fairy) => (b: Fairy) => 
+    (a && b ? a.height > b.height: false)
+const fatherOf = (x: Fairy) => x.father
+const isShorterThanFather = F.comply(isTallerThan, fatherOf)
+const father: Fairy = {height: 11}
+const son: Fairy = {height: 13, father: father}
+const daughter: Fairy = {height: 9, father: father}
+p('is son shorter than father?', isShorterThanFather(son))
+p('is daughter shorter than father?', isShorterThanFather(daughter))
 
 
 
@@ -398,7 +415,7 @@ header('comply')
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
-// bigHeader('lang')
+bigHeader('lang')
 
 // header('throws')
 // ----------------
@@ -413,9 +430,25 @@ header('comply')
 // header('isMultiple')
 // ----------------
   
-// header('append')
+header('append')
 // ----------------
-  
+const append1 = F.append(1)
+const five: number = append1(4)
+p(five, typeof five)
+const a1: string = append1('a')
+p(a1, typeof a1)
+// unfortunately, this works, although the type is actually string
+const weirdThing: number = append1({foo: 1, bar: 2})
+p(weirdThing, typeof weirdThing)
+
+const appendNull = F.append(null)
+const just1: number = appendNull(1)
+p(just1, typeof just1)
+
+const badPigLatin = F.append('ay')
+const oneay: string = badPigLatin(1)
+
+
 // header('isBlank')
 // ----------------
   
