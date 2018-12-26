@@ -118,6 +118,37 @@ const week = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT' ]
 const altWeek = F.moveIndex(0, 10, week)
 p(altWeek)
 
+
+header('cycle')
+// ------------
+
+const cycleDiffKinds = F.cycle(['a', 1, false, 'b', 2])
+p(cycleDiffKinds('a')) // 1
+const dayAfter = F.cycle(week)
+p(dayAfter('TUE')) // WED
+// const cycleObjects = F.cycle([{foo: 1}, {foo: 2}, {foo: 3}]) // type error
+// p(cycleObjects({foo: 1})) // {foo: 1}, since indexOf doesn't deep compare
+
+
+header('arrayToObject')
+// --------------------
+
+const b = (x: any) => `val${x}`
+const boring = F.arrayToObject(x => `key${x}`, x => `val${x}`)
+p(boring([1, 'a', 2, 'b', 3, 'c']))
+const boringKey = F.arrayToObject(x => `key${x}`)
+const boringKeyValue = boringKey(b)
+p(boringKey(b, [1, 'a', 2, 'b', 3, 'c']))
+p(boringKeyValue([1, 'a', 2, 'b', 3, 'c']))
+
+const stringsOnly = F.arrayToObject(
+  (x: string) => `key${x}`,
+  (x: string | number) => `val${x}`
+)
+// restricts the argument array to the stricter type given between k() and v()
+p(stringsOnly(['a', 'b', 'c']))
+
+
 /*
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ================================================================================

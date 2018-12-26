@@ -8,9 +8,6 @@
 // ansi shadow
 declare module 'futil-js' {
 
-  import * as _ from 'lodash'
-
-
 /*
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ================================================================================
@@ -37,6 +34,7 @@ joinString -> [string1, string2, ...stringN] -> string1 + joinString + string2 +
   export function compactJoin(joinString: string): <T>(array: Compactable<T>) => string
   export function compactJoin<T>(joinString: string, array: Compactable<T>): string
   type Compactable<T> = _.List<T | null | undefined | false | '' | 0> | null | undefined
+
 
   /**
 ```
@@ -71,8 +69,8 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * for equality comparisons. Therefore, the input array may contain only those
    * types which `SameValueZero` is able to compare for equality.
    */
-  export function repeated<T>(xs: _.List<Uniqable>): _.List<Uniqable>
-  type Uniqable = number | string | boolean | symbol | null | undefined
+  export function repeated<T>(xs: _.List<Equalable>): _.List<Equalable>
+  type Equalable = number | string | boolean | symbol | null | undefined
 
 
   /**
@@ -119,8 +117,9 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * array and (2) due to the behavior of `_.curry` the created function will
    * return a function equivalent to itself if called with no argument.
    */
-  export function cycle(...x: any): any
-
+  export function cycle<T extends Equalable>(array: _.List<T>): (x: T) => T
+  
+  
   /**
 ```
 (k, v, [a]) -> { k(a): v(a) }
@@ -128,8 +127,21 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * Creates an object from an array by generating a key/value pair for each
    * element in the array using the key and value mapper functions.
    */
-  export function arrayToObject(...x: any): any
+  export function arrayToObject<T, K extends Key, V>
+    (k: Fn<T, K>, v: Fn<T, V>, array: T[]): {[k in K]: V}
+  export function arrayToObject<T, K extends Key, V>
+    (k: Fn<T, K>, v: Fn<T, V>): (array: T[]) => {[k in K]: V}
+  export function arrayToObject<T, K extends Key, V>
+    (k: Fn<T, K>): ArrayToObjectCurryee<T, K, V>
 
+  type Fn<T, U> = (x: T) => U
+  
+  interface ArrayToObjectCurryee<T, K extends Key, V> {
+    (v: (x: T) => V): (array: T[]) => {[k in K]: V},
+    (v: (x: T) => V, array: T[]): {[k in K]: V}
+  }
+  
+  
   /**
 ```
 
