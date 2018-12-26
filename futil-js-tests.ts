@@ -21,7 +21,7 @@ const bigHeader = (name: string) => {
   const sep = sepEq(62)
   const spaceSep = separator(' ')(62)('|')
   const prtName = _.pad(60, _.upperCase(name).split('').join('  '))
-  p(`${sep('/', '\\')}\n${spaceSep}\n| ${prtName} |\n${spaceSep}\n${sep('\\', '/')}`)
+  p(`\n${sep('/', '\\')}\n${spaceSep}\n| ${prtName} |\n${spaceSep}\n${sep('\\', '/')}`)
 }
 
 
@@ -110,6 +110,13 @@ p(F.push('x')(['a', 'b', 'c']))
 p(F.push(null)([]))
 p(F.push('a')([null, 1, 3]))
 
+
+header('moveIndex')
+// ----------------
+
+const week = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT' ]
+const altWeek = F.moveIndex(0, 10, week)
+p(altWeek)
 
 /*
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -380,6 +387,58 @@ const daughter: Fairy = {height: 9, father: father}
 p('is son shorter than father?', isShorterThanFather(son))
 p('is daughter shorter than father?', isShorterThanFather(daughter))
 
+// testing variable-arity comply
+const myComply = <Ag extends any[], Rg, Rf>(
+  f: (arg: Rg) => (...args: Ag) => Rf, 
+  g: (...args: Ag) => Rg
+) => (...x: Ag) => f(g(...x))(...x)
+
+const repeatToArray = (a: string, b: number) => new Array<string>(b).fill(a)
+const joinWithReverse = (xs: string[]) => 
+  (a: string, b: number) => _.join(_.join('')(_.reverse(a)), xs)
+
+// const flipFlop = F.comply(joinWithReverse, repeatToArray)
+const flipFlop2 = myComply(joinWithReverse, repeatToArray)
+// p(flipFlop('/-\\', 5))
+p(flipFlop2('/-\\', 5))
+
+
+header('defer')
+// ------------
+
+p('idk :(')
+
+
+header('debounceAsync')
+// --------------------
+p('coming soon*')
+
+async function testDebounce() {
+  const plusTen = (x: number) => x + 10
+  const asyncP10 = F.debounceAsync(10, plusTen)
+  let aResult = await Promise.all([asyncP10(1), asyncP10(2), asyncP10(3)])
+  const syncP10 = _.debounce(10, plusTen)
+  let sResult = await Promise.all([syncP10(1), syncP10(2), syncP10(3)])
+
+
+  p('\n\n*:')
+  p(aResult) // [13, 13, 13]
+  p(sResult) // [undefined, undefined, undefined]
+}
+testDebounce()
+
+
+header('flurry')
+// -------------
+
+const add3 = (x: number, y: number, z: number) => x + y + z
+const add2 = (x: number, y: number) => x + y
+const double = (x: number) => x * 2
+
+const doubleAdd3 = F.flurry(add3, double)
+
+p(doubleAdd3(1, 4)(5))
+p(doubleAdd3(1)(4)(5))
 
 
 /*

@@ -8,7 +8,7 @@
 // ansi shadow
 declare module 'futil-js' {
 
-  import * as lodash from 'lodash'
+  import * as _ from 'lodash'
 
 
 /*
@@ -106,7 +106,7 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
 ```
    * Moves a value from one index to another.
    */
-  export function moveIndex(...x: any): any
+  export function moveIndex<T extends any[]>(from: number, to: number, array: T): T
 
 
   /**
@@ -417,6 +417,26 @@ f -> array -> [array[0], f(), array[n], ....)
       (converger: (...args: any[]) => R, branches: ((...args: A) => any)[]): 
           (...args: A) => R
 
+          
+  /**
+```
+(f, g) -> x -> f(g(x))(x)
+```
+   * A combinator that combines `compose` and `apply`. `f` should be a 2 place
+   * curried function. Useful for applying comparisons to pairs defined by some
+   * one place function, e.g. `const isShorterThanFather = F.comply(isTallerThan, fatherOf)`
+   * 
+   * Note that the current implementation of `composeApply` only uses the first
+   * argument given, so both `g` and the return function are single-arity only.
+   */
+  export function composeApply<Ag, Rg, Rf>
+    (f: (arg: Rg) => (x: Ag) => Rf, g: (x: Ag) => Rg): (x: Ag) => Rf
+  /* 
+  // here is the variable-arity type definition:
+  export function composeApply<Ag extends any[], Rg, Rf>
+    (f: (arg: Rg) => (...args: Ag) => Rf, g: (...args: Ag) => Rg): (...x: Ag) => Rf
+  */
+
 
   /**
 ```
@@ -424,16 +444,10 @@ f -> array -> [array[0], f(), array[n], ....)
 ```
    * A combinator that combines `compose` and `apply`. `f` should be a 2 place
    * curried function. Useful for applying comparisons to pairs defined by some
-   * one place function, e.g. `var isShorterThanFather = F.comply(isTallerThan, fatherOf)`
-   */
-  export function composeApply<Ag extends any[], Rg, Rf>
-    (f: (arg: Rg) => (...args: Ag) => Rf, g: (...args: Ag) => Rg): (...x: Ag) => Rf
-
-  /**
-```
-(f, g) -> x -> f(g(x))(x)
-```
-   * Alias of `composeApply`.
+   * one place function, e.g. `const isShorterThanFather = F.comply(isTallerThan, fatherOf)`
+   * 
+   * Note that the current implementation of `composeApply` only uses the first
+   * argument given, so both `g` and the return function are single-arity only.
    */
   export const comply: typeof composeApply
 
@@ -441,7 +455,7 @@ f -> array -> [array[0], f(), array[n], ....)
   /**
    * Implement `defer`, ported from bluebird docs and used by debounceAsync.
    */
-  export function defer(...x: any): any
+  export function defer(): {resolve: any, reject: any, promise: Promise<any>}
 
 
   /**
@@ -451,9 +465,10 @@ f -> array -> [array[0], f(), array[n], ....)
    * never returning because they're not executed - the unit tests demonstate
    * it failing with `_.debounce`.
    */
-  export function debounceAsync(...x: any): any
-
-
+  export function debounceAsync<A extends any[], R>
+    (n: number, f: (...args: A) => R): (...args: A) => Promise<R>
+  
+  
   /**
 ```
 (f1, f2, ...fn) -> f1Arg1 -> f1Arg2 -> ...f1ArgN -> fn(f2(f1))
@@ -461,9 +476,9 @@ f -> array -> [array[0], f(), array[n], ....)
    * Flurry is combo of `flow` + `curry`, preserving the arity of the initial
    * function. See https://github.com/lodash/lodash/issues/3612.
    */
-  export function flurry(...x: any): any
-
-
+  export function flurry(...fns: Function[]): Function
+  // TODO: the god damn mess of overrides we need to type curried functions
+  // (thank lodash for not exporting them)
 
 /*
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
