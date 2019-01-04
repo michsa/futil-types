@@ -8,6 +8,8 @@
 // ansi shadow
 declare module 'futil-js' {
 
+  import * as _ from 'lodash/fp'
+
 /*
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ================================================================================
@@ -33,7 +35,7 @@ joinString -> [string1, string2, ...stringN] -> string1 + joinString + string2 +
    */
   export function compactJoin(joinString: string): <T>(array: Compactable<T>) => string
   export function compactJoin<T>(joinString: string, array: Compactable<T>): string
-  type Compactable<T> = _.List<T | null | undefined | false | '' | 0> | null | undefined
+  type Compactable<T> = ArrayLike<T | null | undefined | false | '' | 0> | null | undefined
 
 
   /**
@@ -55,7 +57,7 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * iteratees to one argument, it likewise supports one argument only.
    */
   export function dotJoinWith<T>(filterFunction: (x: T) => boolean | T):
-      (xs: _.List<T>) => string
+      (xs: ArrayLike<T>) => string
 
   
   /**
@@ -69,7 +71,7 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * for equality comparisons. Therefore, the input array may contain only those
    * types which `SameValueZero` is able to compare for equality.
    */
-  export function repeated<T>(xs: _.List<Equalable>): _.List<Equalable>
+  export function repeated<T>(xs: ArrayLike<Equalable>): ArrayLike<Equalable>
   type Equalable = number | string | boolean | symbol | null | undefined
 
 
@@ -80,10 +82,14 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * 
    * Takes any number of ranges and return the result of merging them all.
    * 
+   * Note that `mergeRanges` can be given a nonexistent or empty argument, in
+   * which case it will return an empty array. However, each element within the
+   * argument array, if there are any, *must* be a two-element array of numbers.
+   * 
    * @example [[0,7], [3,9], [11,15]] -> [[0,9], [11,15]]
    */
-  export function mergeRanges(ranges: _.List<NumberRange> | null | undefined): 
-      _.List<NumberRange>
+  export function mergeRanges(ranges: ArrayLike<NumberRange> | null | undefined): 
+      ArrayLike<NumberRange>
   type NumberRange = [number, number]
 
 
@@ -93,9 +99,9 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
 ```
    * Return array with val pushed.
    */
-  export function push<T>(val: T, array: _.List<T>): _.List<T>
-  export function push<T>(val: any, array: _.List<any>): _.List<any>
-  export function push(val: any): (array: _.List<any>) => _.List<any>
+  export function push<T>(val: T, array: ArrayLike<T>): ArrayLike<T>
+  export function push<T>(val: any, array: ArrayLike<any>): ArrayLike<any>
+  export function push(val: any): (array: ArrayLike<any>) => ArrayLike<any>
 
 
   /**
@@ -104,7 +110,7 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
 ```
    * Moves a value from one index to another.
    */
-  export function moveIndex<T extends any[]>(from: number, to: number, array: T): T
+  export function moveIndex<T extends ArrayLike<any>>(from: number, to: number, array: T): T
 
 
   /**
@@ -117,7 +123,7 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * array and (2) due to the behavior of `_.curry` the created function will
    * return a function equivalent to itself if called with no argument.
    */
-  export function cycle<T extends Equalable>(array: _.List<T>): (x: T) => T
+  export function cycle<T extends Equalable>(array: ArrayLike<T>): (x: T) => T
   
   
   /**
@@ -125,31 +131,46 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
 (k, v, [a]) -> { k(a): v(a) }
 ```
    * Creates an object from an array by generating a key/value pair for each
-   * element in the array using the key and value mapper functions.
+   * element in the array using the key and value mapper functions `k` and `v`.
+   * 
+   * The type of the resulting object's keys and values are inferred from the
+   * return types of the `k` and `v` mapper functions, with one exception: when
+   * `v` is curried, the value type is not correctly inferred, and defaults to
+   * `{}`.
    */
   export function arrayToObject<T, K extends Key, V>
-    (k: Fn<T, K>, v: Fn<T, V>, array: T[]): {[k in K]: V}
+    (k: (x: T) => K, v: (x: T) => K, array: ArrayLike<T>): { [k in K]: V }
   export function arrayToObject<T, K extends Key, V>
-    (k: Fn<T, K>, v: Fn<T, V>): (array: T[]) => {[k in K]: V}
-  export function arrayToObject<T, K extends Key, V>
-    (k: Fn<T, K>): ArrayToObjectCurryee<T, K, V>
-
-  type Fn<T, U> = (x: T) => U
+    (k: (x: T) => K, v: (x: T) => V): (array: ArrayLike<T>) => { [k in K]: V }
+  export function arrayToObject<T, K extends Key>
+    (k: (x: T) => K): ArrayToObjectCurryee<T, K>
   
-  interface ArrayToObjectCurryee<T, K extends Key, V> {
-    (v: (x: T) => V): (array: T[]) => {[k in K]: V},
-    (v: (x: T) => V, array: T[]): {[k in K]: V}
+  // necessary for overrides to work in both these cases
+  interface ArrayToObjectCurryee<T1, K extends Key> {
+    <V, T2>(v: (x: T2) => V): (array: ArrayLike<T1 & T2>) => { [k in K]: V },
+    <V, T2>(v: (x: T2) => V, array: ArrayLike<T1 & T2>): { [k in K]: V }
   }
-  
+
+  type InferValue<T> = T extends (...args: any[]) => infer R ? R : never
   
   /**
-```
-
-```
-   * A version of _.zipObjectDeep that supports passing a function to determine
-   * values intead of an array, which will be invoked for each key.
+   * A version of `_.zipObjectDeep` that supports passing a function to 
+   * determine values intead of an array, which will be invoked for each key.
+   * 
+   * The function receives the index of the current element in the `keys` array
+   * as its only argument.
    */
-  export function zipObjectDeepWith(...x: any): any
+  export function zipObjectDeepWith<V>
+    (keys: ArrayLike<Key>, f: (i: number) => V): {[k: string]: V}
+  export function zipObjectDeepWith<V>
+    (keys: ArrayLike<Key>, values: ArrayLike<V>): {[k: string]: V}
+  export function zipObjectDeepWith
+    (keys: ArrayLike<Key>): <V>(f: (i: number) => V) => {[k: string]: V}
+  export function zipObjectDeepWith
+    (keys: ArrayLike<Key>): <V>(values: ArrayLike<V>) => _.LodashZipObjectDeep
+  
+
+
 
   /**
 ```
@@ -158,7 +179,8 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * Converts an array of strings into an object mapping to true. Useful for
    * optimizing `includes`.
    */
-  export function flags(...x: any): any
+  export function flags<T extends Key>(x: ArrayLike<T>): { [k in T]: true }
+
 
   /**
 ```
@@ -167,7 +189,8 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * Returns a list of all prefixes. Works on strings, too. Implementations must
    * guarantee that the orginal argument has a length property.
    */
-  export function prefixes(...x: any): any
+  export function prefixes<T>(x: ArrayLike<T>): ArrayLike<T>
+
 
   /**
 ```
@@ -425,11 +448,57 @@ f -> array -> [array[0], f(), array[n], ....)
    * correctly correspond to the return types of the branch functions, so care
    * must still be taken to avoid runtime errors from mismatched functions.
    */
+  export function converge<A extends unknown[], R>: Converge<A, R>
   export function converge<A extends unknown[], R>
-      (converger: (...args: any[]) => R, branches: ((...args: A) => any)[]): 
+      (converger: (...args: any[]) => R, branches: ArrayLike<((...args: A) => any)>): 
           (...args: A) => R
-
-          
+  
+  type Converger1<R, T1> = (arg: T1) => R
+  type Converger2<R, T1, T2> = (args: [T1, T2]) => R
+  type Converger3<R, T1, T2, T3> = (args: [T1, T2, T3]) => R
+  type Converger4<R, T1, T2, T3, T4> = (args: [T1, T2, T3, T4]) => R
+  type Converger5<R, T1, T2, T3, T4, T5> = (args: [T1, T2, T3, T4, T5]) => R
+  type Converger6<R, T1, T2, T3, T4, T5, T6> = (args: [T1, T2, T3, T4, T5, T6]) => R
+  type Fn<A extends unknown[], R> = (...args: A) => R
+  type Branches1<A extends unknown[], T1> = 
+    [Fn<A, T1>]
+  type Branches2<A extends unknown[], T1, T2> = 
+    [Fn<A, T1>, Fn<A, T2>]
+  type Branches3<A extends unknown[], T1, T2, T3> = 
+    [Fn<A, T1>, Fn<A, T2>, Fn<A, T3>]
+  type Branches4<A extends unknown[], T1, T2, T3, T4> = 
+    [Fn<A, T1>, Fn<A, T2>, Fn<A, T3>, Fn<A, T4>]
+  type Branches5<A extends unknown[], T1, T2, T3, T4, T5> = 
+    [Fn<A, T1>, Fn<A, T2>, Fn<A, T3>, Fn<A, T4>, Fn<A, T5>]
+  type Branches6<A extends unknown[], T1, T2, T3, T4, T5, T6> = 
+    [Fn<A, T1>, Fn<A, T2>, Fn<A, T3>, Fn<A, T4>, Fn<A, T5>, Fn<A, T6>]
+  interface Converge<A extends unknown[], R> {
+    <T1>(
+      converger: Converger1<R, T1>, 
+      branches: Branches1<A, T1>
+    ): (...args: A) => R
+    <T1, T2>(
+      converger: Converger2<R, T1, T2>, 
+      branches: Branches2<A, T1, T2>
+    ): (...args: A) => R
+    <T1, T2, T3>(
+      converger: Converger3<R, T1, T2, T3>, 
+      branches: Branches3<A, T1, T2, T3>
+    ): (...args: A) => R
+    <T1, T2, T3, T4>(
+      converger: Converger4<R, T1, T2, T3, T4>, 
+      branches: Branches4<A, T1, T2, T3, T4>
+    ): (...args: A) => R
+    <T1, T2, T3, T4, T5>(
+      converger: Converger5<R, T1, T2, T3, T4, T5>, 
+      branches: Branches5<A, T1, T2, T3, T4, T5>
+    ): (...args: A) => R
+    <T1, T2, T3, T4, T5, T6>(
+      converger: Converger6<R, T1, T2, T3, T4, T5, T6>, 
+      branches: Branches6<A, T1, T2, T3, T4, T5, T6>
+    ): (...args: A) => R
+  }
+  
   /**
 ```
 (f, g) -> x -> f(g(x))(x)

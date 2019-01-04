@@ -133,20 +133,39 @@ p(dayAfter('TUE')) // WED
 header('arrayToObject')
 // --------------------
 
-const b = (x: any) => `val${x}`
-const boring = F.arrayToObject(x => `key${x}`, x => `val${x}`)
-p(boring([1, 'a', 2, 'b', 3, 'c']))
-const boringKey = F.arrayToObject(x => `key${x}`)
-const boringKeyValue = boringKey(b)
-p(boringKey(b, [1, 'a', 2, 'b', 3, 'c']))
-p(boringKeyValue([1, 'a', 2, 'b', 3, 'c']))
+const boringKey = (x: any) => `key${x}`
+const boringValue = (x: any) => `val${x}`
+const boringA2ONoCurry = F.arrayToObject(x => `key${x}`, x => `val${x}`)
+p(boringA2ONoCurry([1, 'a', 2, 'b', 3, 'c']))
+const boringA2OPartial = F.arrayToObject(boringKey)
+const boringA2O = boringA2OPartial(boringValue)
+p(boringA2OPartial(boringValue, [1, 'a', 2, 'b', 3, 'c']))
+p(boringA2O([1, 'a', 2, 'b', 3, 'c']))
 
 const stringsOnly = F.arrayToObject(
-  (x: string) => `key${x}`,
-  (x: string | number) => `val${x}`
+  (x: string | number) => `key${x}`,
+  (x: string) => x.length
 )
+const stringsOnlyKey = F.arrayToObject((x: string | number) => `key${x}`)
+const stringsOnlyKeyValue = stringsOnlyKey((x: string) => x.length)
 // restricts the argument array to the stricter type given between k() and v()
 p(stringsOnly(['a', 'b', 'c']))
+p(stringsOnlyKeyValue(['a', 'b', 'c']))
+
+
+header('zipObjectDeepWith')
+// ------------------------
+
+p(F.zipObjectDeepWith(['a', 'b'], () => 1))
+p(F.zipObjectDeepWith(['a', 'b'], [1, 1]))
+
+p(F.zipObjectDeepWith(['a.b[0].c', 'a.b[1].d'], [1, 2]))
+p(F.zipObjectDeepWith(['a.b[0].c', 'a.b[1].d'], (x) => [x, x + 1]))
+
+
+const zod2 = (keys: any, f: any) =>
+_.zipObjectDeep(keys, _.isFunction(f) && _.isArray(keys) ? _.times(f, keys.length) : f)
+
 
 
 /*
