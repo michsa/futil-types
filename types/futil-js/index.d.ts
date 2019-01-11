@@ -3,7 +3,7 @@
 // Definitions by: Michelle Saad <https://github.com/michsa>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
-
+interface Foo {}
 // jazmine
 // ansi shadow
 declare module 'futil-js' {
@@ -448,11 +448,6 @@ f -> array -> [array[0], f(), array[n], ....)
    * correctly correspond to the return types of the branch functions, so care
    * must still be taken to avoid runtime errors from mismatched functions.
    */
-  export function converge<A extends unknown[], R>: Converge<A, R>
-  export function converge<A extends unknown[], R>
-      (converger: (...args: any[]) => R, branches: ArrayLike<((...args: A) => any)>): 
-          (...args: A) => R
-  
   type Converger1<R, T1> = (arg: T1) => R
   type Converger2<R, T1, T2> = (args: [T1, T2]) => R
   type Converger3<R, T1, T2, T3> = (args: [T1, T2, T3]) => R
@@ -472,7 +467,7 @@ f -> array -> [array[0], f(), array[n], ....)
     [Fn<A, T1>, Fn<A, T2>, Fn<A, T3>, Fn<A, T4>, Fn<A, T5>]
   type Branches6<A extends unknown[], T1, T2, T3, T4, T5, T6> = 
     [Fn<A, T1>, Fn<A, T2>, Fn<A, T3>, Fn<A, T4>, Fn<A, T5>, Fn<A, T6>]
-  interface Converge<A extends unknown[], R> {
+  export interface Converge<A extends unknown[], R> {
     <T1>(
       converger: Converger1<R, T1>, 
       branches: Branches1<A, T1>
@@ -498,6 +493,7 @@ f -> array -> [array[0], f(), array[n], ....)
       branches: Branches6<A, T1, T2, T3, T4, T5, T6>
     ): (...args: A) => R
   }
+
   
   /**
 ```
