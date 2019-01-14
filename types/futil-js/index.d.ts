@@ -10,6 +10,8 @@ declare module 'futil-js' {
 
   import * as _ from 'lodash/fp'
 
+  type Fn<A extends unknown[], R> = (...args: A) => R
+
 /*
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ================================================================================
@@ -24,6 +26,8 @@ declare module 'futil-js' {
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
+  type Compactable<T> = ArrayLike<T | null | undefined | false | '' | 0> | null | undefined
+  type Equalable = number | string | boolean | symbol | null | undefined
 
   /**
 ```
@@ -35,7 +39,7 @@ joinString -> [string1, string2, ...stringN] -> string1 + joinString + string2 +
    */
   export function compactJoin(joinString: string): <T>(array: Compactable<T>) => string
   export function compactJoin<T>(joinString: string, array: Compactable<T>): string
-  type Compactable<T> = ArrayLike<T | null | undefined | false | '' | 0> | null | undefined
+  
 
 
   /**
@@ -72,7 +76,6 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * types which `SameValueZero` is able to compare for equality.
    */
   export function repeated<T>(xs: ArrayLike<Equalable>): ArrayLike<Equalable>
-  type Equalable = number | string | boolean | symbol | null | undefined
 
 
   /**
@@ -150,7 +153,6 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
     <V, T2>(v: (x: T2) => V): (array: ArrayLike<T1 & T2>) => { [k in K]: V },
     <V, T2>(v: (x: T2) => V, array: ArrayLike<T1 & T2>): { [k in K]: V }
   }
-
   type InferValue<T> = T extends (...args: any[]) => infer R ? R : never
   
   /**
@@ -168,8 +170,6 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
     (keys: ArrayLike<Key>): <V>(f: (i: number) => V) => {[k: string]: V}
   export function zipObjectDeepWith
     (keys: ArrayLike<Key>): <V>(values: ArrayLike<V>) => _.LodashZipObjectDeep
-  
-
 
 
   /**
@@ -448,13 +448,38 @@ f -> array -> [array[0], f(), array[n], ....)
    * correctly correspond to the return types of the branch functions, so care
    * must still be taken to avoid runtime errors from mismatched functions.
    */
-  type Converger1<R, T1> = (arg: T1) => R
+  export function converge<A extends unknown[], R, T1>(
+    converger: Converger1<R, T1>, 
+    branches: Branches1<A, T1>
+  ): (...args: A) => R
+  export function converge<A extends unknown[], R, T1, T2>(
+    converger: Converger2<R, T1, T2>, 
+    branches: Branches2<A, T1, T2>
+  ): (...args: A) => R
+  export function converge<A extends unknown[], R, T1, T2, T3>(
+    converger: Converger3<R, T1, T2, T3>, 
+    branches: Branches3<A, T1, T2, T3>
+  ): (...args: A) => R
+  export function converge<A extends unknown[], R, T1, T2, T3, T4>(
+    converger: Converger4<R, T1, T2, T3, T4>, 
+    branches: Branches4<A, T1, T2, T3, T4>
+  ): (...args: A) => R
+  export function converge<A extends unknown[], R, T1, T2, T3, T4, T5>(
+    converger: Converger5<R, T1, T2, T3, T4, T5>, 
+    branches: Branches5<A, T1, T2, T3, T4, T5>
+  ): (...args: A) => R
+  export function converge<A extends unknown[], R, T1, T2, T3, T4, T5, T6>(
+    converger: Converger6<R, T1, T2, T3, T4, T5, T6>, 
+    branches: Branches6<A, T1, T2, T3, T4, T5, T6>
+  ): (...args: A) => R
+
+  type Converger1<R, T1> = (arg: [T1]) => R
   type Converger2<R, T1, T2> = (args: [T1, T2]) => R
   type Converger3<R, T1, T2, T3> = (args: [T1, T2, T3]) => R
   type Converger4<R, T1, T2, T3, T4> = (args: [T1, T2, T3, T4]) => R
   type Converger5<R, T1, T2, T3, T4, T5> = (args: [T1, T2, T3, T4, T5]) => R
   type Converger6<R, T1, T2, T3, T4, T5, T6> = (args: [T1, T2, T3, T4, T5, T6]) => R
-  type Fn<A extends unknown[], R> = (...args: A) => R
+  
   type Branches1<A extends unknown[], T1> = 
     [Fn<A, T1>]
   type Branches2<A extends unknown[], T1, T2> = 
@@ -467,33 +492,7 @@ f -> array -> [array[0], f(), array[n], ....)
     [Fn<A, T1>, Fn<A, T2>, Fn<A, T3>, Fn<A, T4>, Fn<A, T5>]
   type Branches6<A extends unknown[], T1, T2, T3, T4, T5, T6> = 
     [Fn<A, T1>, Fn<A, T2>, Fn<A, T3>, Fn<A, T4>, Fn<A, T5>, Fn<A, T6>]
-  export interface Converge<A extends unknown[], R> {
-    <T1>(
-      converger: Converger1<R, T1>, 
-      branches: Branches1<A, T1>
-    ): (...args: A) => R
-    <T1, T2>(
-      converger: Converger2<R, T1, T2>, 
-      branches: Branches2<A, T1, T2>
-    ): (...args: A) => R
-    <T1, T2, T3>(
-      converger: Converger3<R, T1, T2, T3>, 
-      branches: Branches3<A, T1, T2, T3>
-    ): (...args: A) => R
-    <T1, T2, T3, T4>(
-      converger: Converger4<R, T1, T2, T3, T4>, 
-      branches: Branches4<A, T1, T2, T3, T4>
-    ): (...args: A) => R
-    <T1, T2, T3, T4, T5>(
-      converger: Converger5<R, T1, T2, T3, T4, T5>, 
-      branches: Branches5<A, T1, T2, T3, T4, T5>
-    ): (...args: A) => R
-    <T1, T2, T3, T4, T5, T6>(
-      converger: Converger6<R, T1, T2, T3, T4, T5, T6>, 
-      branches: Branches6<A, T1, T2, T3, T4, T5, T6>
-    ): (...args: A) => R
-  }
-
+  
   
   /**
 ```
