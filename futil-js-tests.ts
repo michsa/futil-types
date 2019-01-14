@@ -391,12 +391,21 @@ const sum = ([a, b]: number[]) => a + b
 const sumOfMaxAndMin = F.converge(sum, [Math.max, Math.min])
 p(sumOfMaxAndMin(1, 2, 3, 4))
 
-const sayType = (x: string | number) => `'${x}' is a ${typeof x}`
+type StrOrBool = [string | boolean, string]
+type StrOrNum = [string | number]
+type Question = StrOrBool & StrOrNum
+
+const sayType = (x: string | number | boolean) => `'${x}' is a ${typeof x}`
 const isGt5 = (x: number) => x > 5
+// the typedef is not smart enough to merge some argument types properly. eg, 
+// if one branch is [string | number] and the other is [string | boolean], it
+// will throw an error, rather than merging them to [string]. but it can still
+// reduce them to subsets, eg [string | number] and [string | number | boolean]
+// branches will result in a function that takes [string | number].
 const isNumber = (x: string | number) => typeof x === 'number'
 const shoutIfTrue = ([s, b]: [string, boolean]) => b ? _.toUpper(`${s}!`) : s
-const shoutTypeIfNumber = F.converge(shoutIfTrue, [sayType, isNumber])
 const shoutTypeIfGt5 = F.converge(shoutIfTrue, [sayType, isGt5])
+const shoutTypeIfNumber = F.converge(shoutIfTrue, [sayType, isNumber])
 
 p(shoutTypeIfNumber('shhhh'))
 p(shoutTypeIfNumber(8))

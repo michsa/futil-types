@@ -442,44 +442,26 @@ f -> array -> [array[0], f(), array[n], ....)
    * This definition correctly generates types for the created function: its
    * return value matches the return value of the converger function, and its
    * arguments match the arguments of the strictest branch function. It also
-   * ensures that the converger function accepts an array. 
-   * 
-   * However, it does **not** validate that the converger function's arguments
-   * correctly correspond to the return types of the branch functions, so care
-   * must still be taken to avoid runtime errors from mismatched functions.
+   * validates that the converger function's argument array matches the return
+   * types of the branch functions. Works for up to 8 branch functions.
    */
-  export function converge<A extends unknown[], R, T1>(
-    converger: Converger1<R, T1>, 
-    branches: Branches1<A, T1>
-  ): (...args: A) => R
-  export function converge<A extends unknown[], R, T1, T2>(
-    converger: Converger2<R, T1, T2>, 
-    branches: Branches2<A, T1, T2>
-  ): (...args: A) => R
-  export function converge<A extends unknown[], R, T1, T2, T3>(
-    converger: Converger3<R, T1, T2, T3>, 
-    branches: Branches3<A, T1, T2, T3>
-  ): (...args: A) => R
-  export function converge<A extends unknown[], R, T1, T2, T3, T4>(
-    converger: Converger4<R, T1, T2, T3, T4>, 
-    branches: Branches4<A, T1, T2, T3, T4>
-  ): (...args: A) => R
-  export function converge<A extends unknown[], R, T1, T2, T3, T4, T5>(
-    converger: Converger5<R, T1, T2, T3, T4, T5>, 
-    branches: Branches5<A, T1, T2, T3, T4, T5>
-  ): (...args: A) => R
-  export function converge<A extends unknown[], R, T1, T2, T3, T4, T5, T6>(
-    converger: Converger6<R, T1, T2, T3, T4, T5, T6>, 
-    branches: Branches6<A, T1, T2, T3, T4, T5, T6>
+  export function converge<A extends unknown[], R, T extends unknown[]>(
+    converger: Converger<R, T>,
+    branches: Branches<A, T>
   ): (...args: A) => R
 
-  type Converger1<R, T1> = (arg: [T1]) => R
-  type Converger2<R, T1, T2> = (args: [T1, T2]) => R
-  type Converger3<R, T1, T2, T3> = (args: [T1, T2, T3]) => R
-  type Converger4<R, T1, T2, T3, T4> = (args: [T1, T2, T3, T4]) => R
-  type Converger5<R, T1, T2, T3, T4, T5> = (args: [T1, T2, T3, T4, T5]) => R
-  type Converger6<R, T1, T2, T3, T4, T5, T6> = (args: [T1, T2, T3, T4, T5, T6]) => R
-  
+  type Converger<R, T> = (arg: T) => R
+
+  type Branches<A extends unknown[], T extends unknown[]> = 
+    Branches1<A, T[0]> | 
+    Branches2<A, T[0], T[1]> | 
+    Branches3<A, T[0], T[1], T[2]> | 
+    Branches4<A, T[0], T[1], T[2], T[3]> |
+    Branches5<A, T[0], T[1], T[2], T[3], T[4]> |
+    Branches6<A, T[0], T[1], T[2], T[3], T[4], T[5]> |
+    Branches7<A, T[0], T[1], T[2], T[3], T[4], T[5], T[6]> |
+    Branches8<A, T[0], T[1], T[2], T[3], T[4], T[5], T[6], T[7]>
+
   type Branches1<A extends unknown[], T1> = 
     [Fn<A, T1>]
   type Branches2<A extends unknown[], T1, T2> = 
@@ -492,8 +474,11 @@ f -> array -> [array[0], f(), array[n], ....)
     [Fn<A, T1>, Fn<A, T2>, Fn<A, T3>, Fn<A, T4>, Fn<A, T5>]
   type Branches6<A extends unknown[], T1, T2, T3, T4, T5, T6> = 
     [Fn<A, T1>, Fn<A, T2>, Fn<A, T3>, Fn<A, T4>, Fn<A, T5>, Fn<A, T6>]
-  
-  
+  type Branches7<A extends unknown[], T1, T2, T3, T4, T5, T6, T7> = 
+    [Fn<A, T1>, Fn<A, T2>, Fn<A, T3>, Fn<A, T4>, Fn<A, T5>, Fn<A, T6>, Fn<A, T7>]
+  type Branches8<A extends unknown[], T1, T2, T3, T4, T5, T6, T7, T8> = 
+    [Fn<A, T1>, Fn<A, T2>, Fn<A, T3>, Fn<A, T4>, Fn<A, T5>, Fn<A, T6>, Fn<A, T7>, Fn<A, T8>]
+    
   /**
 ```
 (f, g) -> x -> f(g(x))(x)
