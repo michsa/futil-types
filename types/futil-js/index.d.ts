@@ -162,14 +162,14 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * The function receives the index of the current element in the `keys` array
    * as its only argument.
    */
-  export function zipObjectDeepWith<V>
-    (keys: ArrayLike<Key>, f: (i: number) => V): {[k: string]: V}
-  export function zipObjectDeepWith<V>
-    (keys: ArrayLike<Key>, values: ArrayLike<V>): {[k: string]: V}
   export function zipObjectDeepWith
-    (keys: ArrayLike<Key>): <V>(f: (i: number) => V) => {[k: string]: V}
+    (keys: ArrayLike<string>, f: (i: number) => any): _.LodashZipObjectDeep1x2
   export function zipObjectDeepWith
-    (keys: ArrayLike<Key>): <V>(values: ArrayLike<V>) => _.LodashZipObjectDeep
+    (keys: ArrayLike<string>, values: ArrayLike<any>): _.LodashZipObjectDeep1x2
+  export function zipObjectDeepWith
+    (keys: ArrayLike<string>): (f: (i: number) => any) =>  _.LodashZipObjectDeep1x2
+  export function zipObjectDeepWith
+    (keys: ArrayLike<string>): (values: ArrayLike<any>) => _.LodashZipObjectDeep1x2
 
 
   /**
@@ -179,7 +179,7 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * Converts an array of strings into an object mapping to true. Useful for
    * optimizing `includes`.
    */
-  export function flags<T extends Key>(x: ArrayLike<T>): { [k in T]: true }
+  export function flags(x: ArrayLike<string>): _.LodashZipObjectDeep1x2
 
 
   /**
@@ -189,7 +189,7 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * Returns a list of all prefixes. Works on strings, too. Implementations must
    * guarantee that the orginal argument has a length property.
    */
-  export function prefixes<T>(x: ArrayLike<T>): ArrayLike<T>
+  export function prefixes<T extends ArrayLike<any>>(x: T): Array<T>
 
 
   /**
@@ -199,7 +199,11 @@ string -> {encode: array -> string, decode: string -> array}
    * Creates an object with encode and decode functions for encoding arrays as
    * strings. The input string is used as input for join/split.
    */
-  export function encoder(...x: any): any
+  export function encoder(input: string): Encoder
+  export type Encoder = {
+    encode: (x: ArrayLike<any>) => string
+    decode: (x: string) => Array<string>
+  }
 
   /**
 ```
@@ -207,7 +211,8 @@ string -> {encode: array -> string, decode: string -> array}
 ```
    * An encoder using `.` as the separator.
    */
-  export function dotEncoder(...x: any): any
+  export const dotEncoder: Encoder
+
 
   /**
 ```
@@ -215,7 +220,8 @@ string -> {encode: array -> string, decode: string -> array}
 ```
    * An encoder using `/` as the separator
    */
-  export function slashEncoder(...x: any): any
+  export const slashEncoder: Encoder
+
 
   /**
 ```
@@ -225,7 +231,9 @@ string -> {encode: array -> string, decode: string -> array}
    * elements of the original array, grouped by the first function received.
    * Similar to Haskell's [groupBy](http://zvon.org/other/haskell/Outputlist/groupBy_f.html).
    */
-  export function chunkBy(...x: any): any
+  export function chunkBy<T>(f: <T>(a: T[], b: T) => boolean, a: ArrayLike<T>): T[][]
+  export function chunkBy<T>(f: (a: T[], b: T) => boolean): (a: ArrayLike<T>) => T[][]
+
 
   /**
 ```
@@ -234,7 +242,9 @@ string -> {encode: array -> string, decode: string -> array}
    * Removes an element from an array if it's included in the array, or pushes
    * it in if it doesn't. Immutable (so it's a clone of the array).
    */
-  export function toggleElement(...x: any): any
+  export function toggleElement<X, A>(x: X, a: ArrayLike<A>): ArrayLike<A | X>
+  export function toggleElement<X>(x: X): <A>(a: ArrayLike<A>) => ArrayLike<A | X>
+  
 
   /**
 ```
@@ -245,7 +255,18 @@ bool -> value -> list -> newList
    * have a checkbox that you want to represent membership of a value in a set
    * instead of an implicit toggle. Used by `includeLens`.
    */
-  export function toggleElementBy(...x: any): any
+  export function toggleElementBy<X, A>
+    (shouldToggle: boolean, value: X, list: ArrayLike<A>): ArrayLike<A | X>
+  export function toggleElementBy<X>
+    (shouldToggle: boolean, value: X): <A>(list: ArrayLike<A>) => ArrayLike<A | X>
+  export function toggleElementBy(shouldToggle: boolean): ToggleElementByCurryee
+  
+  // necessary for overrides to work in both these cases
+  interface ToggleElementByCurryee {
+    <X>(value: X): <A>(list: ArrayLike<A>) => ArrayLike<A | X>,
+    <X, A>(value: X, list: ArrayLike<A>): ArrayLike<A | X>
+  }
+  
 
   /**
 ```
@@ -259,7 +280,13 @@ f -> array -> [array[0], f(), array[n], ....)
    * **Note:** `intersperse` can be used with JSX components! To see an example,
    * please check the official documentation at https://github.com/smartprocure/futil-js#intersperse.
    */
-  export function intersperse(...x: any): any
+  export function intersperse<T, F>(f: Interspersed<T, F>, array: ArrayLike<T>):
+    ArrayLike<T | F>
+  export function intersperse<T, F>(f: Interspersed<T, F>): 
+    (array: ArrayLike<T>) => ArrayLike<T | F>
+  
+  export type Interspersed<T, R> = R | 
+    ((acc: ArrayLike<T | R>, i: number, xs: ArrayLike<T>) => R)
 
 /*
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

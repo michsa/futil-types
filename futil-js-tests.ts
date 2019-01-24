@@ -109,6 +109,7 @@ p(F.push(1, ['a', 'b', 'c']))
 p(F.push('x')(['a', 'b', 'c']))
 p(F.push(null)([]))
 p(F.push('a')([null, 1, 3]))
+p(F.push('a', 'hello'))
 
 
 header('moveIndex')
@@ -160,12 +161,92 @@ p(F.zipObjectDeepWith(['a', 'b'], () => 1))
 p(F.zipObjectDeepWith(['a', 'b'], [1, 1]))
 
 p(F.zipObjectDeepWith(['a.b[0].c', 'a.b[1].d'], [1, 2]))
-p(F.zipObjectDeepWith(['a.b[0].c', 'a.b[1].d'], (x) => [x, x + 1]))
+const zipped = F.zipObjectDeepWith(['a.b[0].c', 'a.b[1].d'], (x) => [x, x + 1])
+p(zipped)
 
-
-const zod2 = (keys: any, f: any) =>
+const zod2 = (keys: any, f?: any) =>
 _.zipObjectDeep(keys, _.isFunction(f) && _.isArray(keys) ? _.times(f, keys.length) : f)
 
+const zipped2 = zod2(['a.b[0].c', 'a.b[1].d'])
+p(zipped2)
+
+
+header('prefixes')
+// ---------------
+
+const prefixes1 = F.prefixes([1, 2, 3])
+const prefixes2 = F.prefixes('hello')
+const prefixes3 = F.prefixes(['h', 'e', 'l', 'l', 'o'])
+// should work the same
+p(prefixes2.join(''))
+p(prefixes3.join(''))
+
+
+header('encoder')
+// --------------
+
+const enc = F.encoder('*')
+const encoded = enc.encode([1, 2, 3])
+p(enc.encode('hello'))
+p(encoded)
+p(enc.decode(encoded))
+
+
+header('dotEncoder')
+// -----------------
+
+const denc = F.dotEncoder
+p(denc.encode([4, 5, 6]))
+
+
+header('chunkBy')
+// --------------
+
+const chunkNum = [1, 2, 1, 3, 3, 4, 4, 1, 5, 3, 6, 1]
+const chunkStr = 'aabccddeedefffg'
+const chunkIncreasing = <T>(a: ArrayLike<T>, b: T) => b <= a[0]
+const chunked1 = F.chunkBy(chunkIncreasing, chunkNum)
+const chunked2 = F.chunkBy(chunkIncreasing)(chunkStr)
+p(chunked1)
+p(chunked2)
+
+
+header('toggleElement')
+// --------------------
+// if toggleElement finds an element to remove from a string, its return value
+// is an array. if it doesn't, and instead appends, its return is still a string.
+// from what i understand, the ArrayLike type should be able to handle this
+// situation, casting with `as` when necessary. not sure though, might be bugs
+const notAString = F.toggleElement('d', chunkStr)
+p(notAString, typeof notAString)
+const stillAString = F.toggleElement('h', chunkStr) as string
+p(stillAString, typeof(stillAString))
+stillAString.split(' ')
+p(F.toggleElement('a', [1, 'a', 2, 'b', 3, 'c']))
+
+const toggleA = F.toggleElement('a')
+toggleA([1, 'a', 2, 'b', 3, 'c'])
+toggleA('hello')
+// should give an error, because type of array does not include type of togglee
+// p(toggleA([1, 2, 3]))  
+
+
+header('toggleElementBy')
+// ----------------------
+// same as toggleElement but with an extra param, 
+// just make sure the 3-arity currying works
+p(F.toggleElementBy(true, 'd', chunkStr))
+p(F.toggleElementBy(true, 'd')(chunkStr))
+p(F.toggleElementBy(true)('d', chunkStr))
+p(F.toggleElementBy(true)('d')(chunkStr))
+
+
+header('intersperse')
+// ------------------
+p(F.intersperse('and', [1, 2, 3]))
+const andFinally = <T>(acc: any, i: number, xs: ArrayLike<T>) => 
+    (i === xs.length - 1 ? 'and finally' : 'and')
+p(F.intersperse(andFinally, [1, 2, 3]))
 
 
 /*
