@@ -6,7 +6,7 @@ import * as _ from 'lodash/fp'
 
 const p = (...x: any[]) => console.log(...x)
 
-const separator = (char: string) => (length: number) => (first: string, last?: string) => 
+const separator = (char: string) => (length: number) => (first: string, last?: string) =>
   `${first}${char.repeat(length)}${last ? last : first}`
 
 const sepDash = separator('-')
@@ -28,14 +28,14 @@ const bigHeader = (name: string) => {
 /*
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ================================================================================
- 
+
                   █████╗  ██████╗  ██████╗   █████╗ ██╗   ██╗
                  ██╔══██╗ ██╔══██╗ ██╔══██╗ ██╔══██╗╚██╗ ██╔╝
-                 ███████║ █████╔═╝ █████╔═╝ ███████║ ╚████╔╝ 
-                 ██╔══██║ ██╔══██╗ ██╔══██╗ ██╔══██║  ╚██╔╝  
-                 ██║  ██║ ██║  ██║ ██║  ██║ ██║  ██║   ██║   
-                 ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝   ╚═╝   
- 
+                 ███████║ █████╔═╝ █████╔═╝ ███████║ ╚████╔╝
+                 ██╔══██║ ██╔══██╗ ██╔══██╗ ██╔══██║  ╚██╔╝
+                 ██║  ██║ ██║  ██║ ██║  ██║ ██║  ██║   ██║
+                 ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝   ╚═╝
+
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
@@ -228,12 +228,12 @@ const toggleA = F.toggleElement('a')
 toggleA([1, 'a', 2, 'b', 3, 'c'])
 toggleA('hello')
 // should give an error, because type of array does not include type of togglee
-// p(toggleA([1, 2, 3]))  
+// p(toggleA([1, 2, 3]))
 
 
 header('toggleElementBy')
 // ----------------------
-// same as toggleElement but with an extra param, 
+// same as toggleElement but with an extra param,
 // just make sure the 3-arity currying works
 p(F.toggleElementBy(true, 'd', chunkStr))
 p(F.toggleElementBy(true, 'd')(chunkStr))
@@ -244,7 +244,7 @@ p(F.toggleElementBy(true)('d')(chunkStr))
 header('intersperse')
 // ------------------
 p(F.intersperse('and', [1, 2, 3]))
-const andFinally = <T>(acc: any, i: number, xs: ArrayLike<T>) => 
+const andFinally = <T>(acc: any, i: number, xs: ArrayLike<T>) =>
     (i === xs.length - 1 ? 'and finally' : 'and')
 p(F.intersperse(andFinally, [1, 2, 3]))
 
@@ -255,10 +255,10 @@ p(F.intersperse(andFinally, [1, 2, 3]))
 
               █████╗   ██████╗ ██████╗  ███████╗  ██████╗████████╗
              ██╔══██╗ ██╔════╝ ██╔══██╗ ██╔════╝ ██╔════╝╚══██╔══╝
-             ███████║ ╚█████═╗ ██████╔╝ █████╗   ██║        ██║   
-             ██╔══██║  ╚═══██║ ██╔═══╝  ██╔══╝   ██║        ██║   
-             ██║  ██║ ██████╔╝ ██║      ███████╗ ╚██████╗   ██║   
-             ╚═╝  ╚═╝ ╚═════╝  ╚═╝      ╚══════╝  ╚═════╝   ╚═╝   
+             ███████║ ╚█████═╗ ██████╔╝ █████╗   ██║        ██║
+             ██╔══██║  ╚═══██║ ██╔═══╝  ██╔══╝   ██║        ██║
+             ██║  ██║ ██████╔╝ ██║      ███████╗ ╚██████╗   ██║
+             ╚═╝  ╚═╝ ╚═════╝  ╚═╝      ╚══════╝  ╚═════╝   ╚═╝
 
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -321,7 +321,7 @@ p(F.intersperse(andFinally, [1, 2, 3]))
 ██║    ██║  ██║ ██╔████║ ╚██╗██╔╝ ██╔═╝   ██╔═██╗  ╚══██║ ██║ ██║  ██║ ██╔████║
 ╚█████╗╚█████╔╝ ██║╚███║  ╚███╔╝  ██████╗ ██║ ██║ █████╔╝ ██║ ╚█████╔╝ ██║╚███║
  ╚════╝ ╚════╝  ╚═╝ ╚══╝   ╚══╝   ╚═════╝ ╚═╝ ╚═╝ ╚════╝  ╚═╝  ╚════╝  ╚═╝ ╚══╝
-      
+
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
@@ -389,6 +389,23 @@ p(F.intersperse(andFinally, [1, 2, 3]))
 // header('findIndexed')
 // ----------------
 
+var users = [
+  { 'user': 'barney',  'age': 36, 'active': true },
+  { 'user': 'fred',    'age': 40, 'active': false },
+  { 'user': 'pebbles', 'age': 1,  'active': true }
+];
+p(F.findIndexed((o, i) => o.age < i, users))
+// The `_.matches` iteratee shorthand.
+p(F.findIndexed({ 'age': 1, 'active': true }, users))
+// The `_.matchesProperty` iteratee shorthand.
+p(F.findIndexed(['active', false], users))
+// The `_.property` iteratee shorthand.
+p(F.findIndexed('active', users))
+// => object for 'barney'
+
+_.find((o, i) => o.age < i, users)
+F.findIndexed('active')
+
 // header('eachIndexed')
 // ----------------
 
@@ -424,7 +441,7 @@ header('maybeCall')
 // note: maybeCall is NOT auto-curried (thankfully)
 const fun = (x: string, y: number) => y < 10 ? x.repeat(y) : y
 const fun0 = () => 5
-const notFun = {a: 1, b: 2} 
+const notFun = {a: 1, b: 2}
 p(F.maybeCall(fun, 'a', 2)) //=> 3
 p(F.maybeCall(notFun, 1, 2)) //=> false, args irrelevant
 p(F.maybeCall(fun0))
@@ -478,7 +495,7 @@ type Question = StrOrBool & StrOrNum
 
 const sayType = (x: string | number | boolean) => `'${x}' is a ${typeof x}`
 const isGt5 = (x: number) => x > 5
-// the typedef is not smart enough to merge some argument types properly. eg, 
+// the typedef is not smart enough to merge some argument types properly. eg,
 // if one branch is [string | number] and the other is [string | boolean], it
 // will throw an error, rather than merging them to [string]. but it can still
 // reduce them to subsets, eg [string | number] and [string | number | boolean]
@@ -517,7 +534,7 @@ interface Fairy {
   height: number, // (in centimeters)
   father?: Fairy
 }
-const isTallerThan = (a?: Fairy) => (b: Fairy) => 
+const isTallerThan = (a?: Fairy) => (b: Fairy) =>
     (a && b ? a.height > b.height: false)
 const fatherOf = (x: Fairy) => x.father
 const isShorterThanFather = F.comply(isTallerThan, fatherOf)
@@ -529,12 +546,12 @@ p('is daughter shorter than father?', isShorterThanFather(daughter))
 
 // testing variable-arity comply
 const myComply = <Ag extends any[], Rg, Rf>(
-  f: (arg: Rg) => (...args: Ag) => Rf, 
+  f: (arg: Rg) => (...args: Ag) => Rf,
   g: (...args: Ag) => Rg
 ) => (...x: Ag) => f(g(...x))(...x)
 
 const repeatToArray = (a: string, b: number) => new Array<string>(b).fill(a)
-const joinWithReverse = (xs: string[]) => 
+const joinWithReverse = (xs: string[]) =>
   (a: string, b: number) => _.join(_.join('')(_.reverse(a)), xs)
 
 // const flipFlop = F.comply(joinWithReverse, repeatToArray)
@@ -591,7 +608,7 @@ p(doubleAdd3(1)(4)(5))
   ██║    ██║    ██╔══╝   ██╔══██╗ ██╔══██║   ██║   ██║   ██║ ██╔══██╗  ╚═══██║
   ██║    ██║    ███████╗ ██║  ██║ ██║  ██║   ██║   ╚██████╔╝ ██║  ██║ ██████╔╝
   ╚═╝    ╚═╝    ╚══════╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝   ╚═╝    ╚═════╝  ╚═╝  ╚═╝ ╚═════╝
-                                                                      
+
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
@@ -603,32 +620,53 @@ p(doubleAdd3(1)(4)(5))
 /*
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ================================================================================
-                                                        
-                     ██╗      █████╗  ███╗   ██╗  ██████╗ 
-                     ██║     ██╔══██╗ ████╗  ██║ ██╔════╝ 
+
+                     ██╗      █████╗  ███╗   ██╗  ██████╗
+                     ██║     ██╔══██╗ ████╗  ██║ ██╔════╝
                      ██║     ███████║ ██╔██╗ ██║ ██║  ███╗
                      ██║     ██╔══██║ ██║╚██╗██║ ██║   ██║
                      ███████╗██║  ██║ ██║ ╚████║ ╚██████╔╝
-                     ╚══════╝╚═╝  ╚═╝ ╚═╝  ╚═══╝  ╚═════╝ 
-                                                      
+                     ╚══════╝╚═╝  ╚═╝ ╚═╝  ╚═══╝  ╚═════╝
+
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
 bigHeader('lang')
 
-// header('throws')
-// ----------------
-  
-// header('tapError')
-// ----------------
-  
-// header('exists')
-// ----------------
-// (alias: isNotNil)
-  
-// header('isMultiple')
-// ----------------
-  
+header('throws')
+// -------------
+try {
+  F.throws(Error('throws'))
+}
+catch (err) {
+  p(err)
+}
+
+
+header('tapError')
+// ---------------
+try {
+  const princ = (e: Error, x: number) => p(x + 1)
+  F.tapError(princ)(Error('tapError'), 4)
+}
+catch (err) {
+  p(err)
+}
+
+
+header('exists') // (alias: isNotNil)
+// ----------------------------------
+p(F.exists(undefined))
+p(F.exists((x: any) => x))
+
+
+header('isMultiple')
+// -----------------
+p(F.isMultiple({length: 2}))
+p(F.isMultiple(2))
+p(F.isMultiple('hello'))
+
+
 header('append')
 // ----------------
 const append1 = F.append(1)
@@ -650,10 +688,10 @@ const oneay: string = badPigLatin(1)
 
 // header('isBlank')
 // ----------------
-  
+
 // header('isNotBlank')
 // ----------------
-  
+
 // header('isBlankDeep')
 // ----------------
 
@@ -667,7 +705,7 @@ const oneay: string = badPigLatin(1)
                       ██║     ██╔══╝   ██║╚██╗██║  ╚═══██║
                       ███████╗███████╗ ██║ ╚████║ ██████╔╝
                       ╚══════╝╚══════╝ ╚═╝  ╚═══╝ ╚═════╝
-                                  
+
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
@@ -675,49 +713,49 @@ const oneay: string = badPigLatin(1)
 
 // header('functionLens')
 // ----------------
-  
+
 // header('objectLens')
 // ----------------
-  
+
 // header('fnToObj')
 // ----------------
-  
+
 // header('objToFn')
 // ----------------
-  
+
 // header('lensProp')
 // ----------------
-  
+
 // header('lensOf')
 // ----------------
-  
+
 // header('includeLens')
 // ----------------
-  
+
 // header('view')
 // ----------------
-  
+
 // header('views')
 // ----------------
-  
+
 // header('set')
 // ----------------
-  
+
 // header('sets')
 // ----------------
-  
+
 // header('setsWith')
 // ----------------
-  
+
 // header('flip')
 // ----------------
-  
+
 // header('on')
 // ----------------
-  
+
 // header('off')
 // ----------------
-  
+
 // header('domLens')
 // ----------------
 
@@ -727,11 +765,11 @@ const oneay: string = badPigLatin(1)
 
                     ██╗      ██████╗   ██████╗  ██╗  ██████╗
                     ██║     ██╔═══██╗ ██╔════╝  ██║ ██╔════╝
-                    ██║     ██║   ██║ ██║  ███╗ ██║ ██║     
-                    ██║     ██║   ██║ ██║   ██║ ██║ ██║     
+                    ██║     ██║   ██║ ██║  ███╗ ██║ ██║
+                    ██║     ██║   ██║ ██║   ██║ ██║ ██║
                     ███████╗╚██████╔╝ ╚██████╔╝ ██║ ╚██████╗
                     ╚══════╝ ╚═════╝   ╚═════╝  ╚═╝  ╚═════╝
-                                     
+
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
@@ -739,16 +777,16 @@ const oneay: string = badPigLatin(1)
 
 // header('ifElse')
 // ----------------
-  
+
 // header('when')
 // ----------------
-  
+
 // header('unless')
 // ----------------
-  
+
 // header('whenExists')
 // ----------------
-  
+
 // header('whenTruthy')
 // ----------------
 
@@ -758,10 +796,10 @@ const oneay: string = badPigLatin(1)
 
                ██████╗  ██████╗      ██╗ ███████╗ ██████╗████████╗
               ██╔═══██╗ ██╔══██╗     ██║ ██╔════╝██╔════╝╚══██╔══╝
-              ██║   ██║ ██████╔╝     ██║ █████╗  ██║        ██║   
-              ██║   ██║ ██╔══██╗██   ██║ ██╔══╝  ██║        ██║   
-              ╚██████╔╝ ██████╔╝╚█████╔╝ ███████╗╚██████╗   ██║   
-               ╚═════╝  ╚═════╝  ╚════╝  ╚══════╝ ╚═════╝   ╚═╝   
+              ██║   ██║ ██████╔╝     ██║ █████╗  ██║        ██║
+              ██║   ██║ ██╔══██╗██   ██║ ██╔══╝  ██║        ██║
+              ╚██████╔╝ ██████╔╝╚█████╔╝ ███████╗╚██████╗   ██║
+               ╚═════╝  ╚═════╝  ╚════╝  ╚══════╝ ╚═════╝   ╚═╝
 
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -770,103 +808,103 @@ const oneay: string = badPigLatin(1)
 
 // header('singleObject')
 // ----------------
-  
+
 // header('singleObjectR')
 // ----------------
-  
+
 // header('chunkObject')
 // ----------------
-  
+
 // header('compactObject')
 // ----------------
-  
+
 // header('isEmptyObject')
 // ----------------
-  
+
 // header('isNotEmptyObject')
 // ----------------
-  
+
 // header('stripEmptyObjects')
 // ----------------
-  
+
 // header('pickInto')
 // ----------------
-  
+
 // header('renameProperty')
 // ----------------
-  
+
 // header('unwind')
 // ----------------
-  
+
 // header('isFlatObject')
 // ----------------
-  
+
 // header('flattenObject')
 // ----------------
-  
+
 // header('unflattenObject')
 // ----------------
-  
+
 // header('matchesSignature')
 // ----------------
-  
+
 // header('matchesSome')
 // ----------------
-  
+
 // header('compareDeep')
 // ----------------
-  
+
 // header('mapProp')
 // ----------------
-  
+
 // header('getOrReturn')
 // ----------------
-  
+
 // header('alias')
 // ----------------
-  
+
 // header('aliasIn')
 // ----------------
-  
+
 // header('cascade')
 // ----------------
-  
+
 // header('cascadeIn')
 // ----------------
-  
+
 // header('cascadeKey')
 // ----------------
-  
+
 // header('cascadePropKey')
 // ----------------
-  
+
 // header('cascadeProp')
 // ----------------
-  
+
 // header('unkeyBy')
 // ----------------
-  
+
 // header('simpleDiff')
 // ----------------
-  
+
 // header('simpleDiffArray')
 // ----------------
-  
+
 // header('diff')
 // ----------------
-  
+
 // header('diffArray')
 // ----------------
-  
+
 // header('pickOn')
 // ----------------
-  
+
 // header('mergeAllArrays')
 // ----------------
-  
+
 // header('invertByArray')
 // ----------------
-  
+
 // header('stampKey')
 // ----------------
 
@@ -877,11 +915,11 @@ const oneay: string = badPigLatin(1)
 
                  ██████╗  ███████╗  ██████╗  ███████╗ ██╗  ██╗
                  ██╔══██╗ ██╔════╝ ██╔════╝  ██╔════╝ ╚██╗██╔╝
-                 █████╔═╝ █████╗   ██║  ███╗ █████╗    ╚███╔╝ 
-                 ██╔══██╗ ██╔══╝   ██║   ██║ ██╔══╝    ██╔██╗ 
+                 █████╔═╝ █████╗   ██║  ███╗ █████╗    ╚███╔╝
+                 ██╔══██╗ ██╔══╝   ██║   ██║ ██╔══╝    ██╔██╗
                  ██║  ██║ ███████╗ ╚██████╔╝ ███████╗ ██╔╝ ██╗
                  ╚═╝  ╚═╝ ╚══════╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═╝
-                                         
+
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
@@ -921,13 +959,13 @@ const oneay: string = badPigLatin(1)
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ================================================================================
 
-               ██████╗████████╗ ██████╗  ██╗ ███╗   ██╗  ██████╗ 
-              ██╔════╝╚══██╔══╝ ██╔══██╗ ██║ ████╗  ██║ ██╔════╝ 
+               ██████╗████████╗ ██████╗  ██╗ ███╗   ██╗  ██████╗
+              ██╔════╝╚══██╔══╝ ██╔══██╗ ██║ ████╗  ██║ ██╔════╝
               ╚█████═╗   ██║    █████╔═╝ ██║ ██╔██╗ ██║ ██║  ███╗
                ╚═══██║   ██║    ██╔══██╗ ██║ ██║╚██╗██║ ██║   ██║
               ██████╔╝   ██║    ██║  ██║ ██║ ██║ ╚████║ ╚██████╔╝
-              ╚═════╝    ╚═╝    ╚═╝  ╚═╝ ╚═╝ ╚═╝  ╚═══╝  ╚═════╝ 
-                                               
+              ╚═════╝    ╚═╝    ╚═╝  ╚═╝ ╚═╝ ╚═╝  ╚═══╝  ╚═════╝
+
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
@@ -944,7 +982,7 @@ const oneay: string = badPigLatin(1)
 
 // header('concatStrings')
 // ----------------
-  
+
 // header('trimStrings')
 // ----------------
 
@@ -970,21 +1008,34 @@ const oneay: string = badPigLatin(1)
 
                      ████████╗██████╗  ███████╗ ███████╗
                      ╚══██╔══╝██╔══██╗ ██╔════╝ ██╔════╝
-                        ██║   █████╔═╝ █████╗   █████╗  
-                        ██║   ██╔══██╗ ██╔══╝   ██╔══╝  
+                        ██║   █████╔═╝ █████╗   █████╗
+                        ██║   ██╔══██╗ ██╔══╝   ██╔══╝
                         ██║   ██║  ██║ ███████╗ ███████╗
                         ╚═╝   ╚═╝  ╚═╝ ╚══════╝ ╚══════╝
-                                 
+
 ================================================================================
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 */
 // bigHeader('tree')
 
-// header('isTraversable')
-// ----------------
+header('isTraversable')
+// --------------------
+p(F.isTraversable(Array(1, 2, 3)))
+p(F.isTraversable(1))
+p(F.isTraversable({1: 'a', 2: 'b', 'foo': 'bar'}))
+p(F.isTraversable(undefined))
+p(F.isTraversable(null))
 
-// header('traverse')
-// ----------------
+
+header('traverse')
+// ---------------
+p(F.traverse([1]))
+p(F.traverse({1: 'a', 2: 'b', 'foo': 'bar'}))
+// should just give us a false type if the argument is not traversable.
+// not necessarily watertight, but seems to work
+const shouldBeFalse = F.traverse(undefined)
+p(shouldBeFalse, typeof shouldBeFalse)
+
 
 // header('walk')
 // ----------------
