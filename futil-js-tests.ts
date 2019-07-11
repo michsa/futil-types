@@ -127,9 +127,22 @@ const cycleDiffKinds = F.cycle(['a', 1, false, 'b', 2])
 p(cycleDiffKinds('a')) // 1
 const dayAfter = F.cycle(week)
 p(dayAfter('TUE')) // WED
-// const cycleObjects = F.cycle([{foo: 1}, {foo: 2}, {foo: 3}]) // type error
-// p(cycleObjects({foo: 1})) // {foo: 1}, since indexOf doesn't deep compare
+const fooCycle = [{foo: 1}, {foo: 2}, {foo: 3}]
+const cycleObjects = F.cycle(fooCycle) // type error
+p(cycleObjects({foo: 2})) // {foo: 1}, since indexOf doesn't deep compare
+p(cycleObjects(cycleObjects())) // {foo: 2}, since object references work for shallow eq
 
+let superWeirdThing = {
+    0: 'w',
+    1: 't',
+    2: 'f',
+    length: 3,
+    indexOf: (value: string) => parseInt(_.findKey((x: string) => x == value, superWeirdThing) || '-1')
+}
+p('superWeirdThing')
+p(F.cycle(superWeirdThing)('f'))
+p(F.cycle(superWeirdThing)('g'))
+p(F.cycle(['a', 'b', 'c'])('g'))
 
 header('arrayToObject')
 // --------------------
@@ -390,10 +403,10 @@ p(F.intersperse(andFinally, [1, 2, 3]))
 // ----------------
 
 var users = [
-  { 'user': 'barney',  'age': 36, 'active': true },
-  { 'user': 'fred',    'age': 40, 'active': false },
-  { 'user': 'pebbles', 'age': 1,  'active': true }
-];
+  { user: 'barney', age: 36, active: true },
+  { user: 'fred', age: 40, active: false },
+  { user: 'pebbles', age: 1, active: true }
+]
 p(F.findIndexed((o, i) => o.age < i, users))
 // The `_.matches` iteratee shorthand.
 p(F.findIndexed({ 'age': 1, 'active': true }, users))
@@ -403,7 +416,7 @@ p(F.findIndexed(['active', false], users))
 p(F.findIndexed('active', users))
 // => object for 'barney'
 
-_.find((o, i) => o.age < i, users)
+// _.find((o, i) => o.age < i, users)
 F.findIndexed('active')
 
 // header('eachIndexed')

@@ -125,8 +125,18 @@ filterFunction -> [string1, string2, ...stringN] -> string1 + '.' + string2 + '.
    * This will return the first element of the array for any argument not in the
    * array and (2) due to the behavior of `_.curry` the created function will
    * return a function equivalent to itself if called with no argument.
+   * 
+   * `cycle` does not deep compare, so passing a clone of an object in the
+   * original array will return the first element. However, passing a reference
+   * to an object in the original array will still return the next element after
+   * that object:
+```
+let foos = [{foo: 0}, {foo: 1}, {foo: 2}]
+F.cycle(foos)({foo: 1})  //-> {foo: 0}
+F.cycle(foos)(foos[1])  //-> {foo: 2}
+```
    */
-  export function cycle<T extends Equalable>(array: ArrayLike<T>): (x: T) => T
+  export function cycle<T extends any>(array: ArrayLike<T>): (x?: T) => T
 
 
   /**
@@ -398,59 +408,16 @@ f -> array -> [array[0], f(), array[n], ....)
 
   // export function mapIndexed
 
-  //(x: T, i: number, xs: T[]) => boolean
-  export function findIndexed<T, S extends T>(
-    predicate: NoCapValueIteratorTypeGuard<T, S>
-  ): LodashFind1x1<T, S>
-  export function findIndexed<T>(
-    predicate: _.LoDashFp,
-    collection: ArrayLike<T> | null | undefined
-  ): LodashFind1x2<T>
-  export function findIndexed<T, S extends T>(
-    predicate: NoCapValueIteratorTypeGuard<T, S>,
-    collection: ArrayLike<T> | null | undefined
-  ): S|undefined
-  export function findIndexed<T>(
-    predicate: ValueIterateeCustom<T, boolean>
-  ): LodashFind2x1<T>
-  export function findIndexed<T>(
-    predicate: ValueIterateeCustom<T, boolean>,
-    collection: ArrayLike<T> | null | undefined
-  ): T|undefined
-  export function findIndexed<T extends object, S extends T[keyof T]>(
-    predicate: NoCapValueIteratorTypeGuard<T[keyof T], S>
-  ): LodashFind3x1<T, S>
-  export function findIndexed<T extends object>(
-    predicate: _.LoDashFp,
-    collection: T | null | undefined
-  ): LodashFind3x2<T>
-  export function findIndexed<T extends object, S extends T[keyof T]>(
-    predicate: NoCapValueIteratorTypeGuard<T[keyof T], S>,
-    collection: T | null | undefined
-  ): S|undefined
-  export function findIndexed<T extends object>(
-    predicate: ValueIterateeCustom<T[keyof T], boolean>,
-    collection: T | null | undefined
-  ): T[keyof T]|undefined
 
-  type LodashFind1x1<T, S> = (collection: ArrayLike<T> | null | undefined) => S|undefined;
-  interface LodashFind1x2<T> {
-      <S extends T>(predicate: NoCapValueIteratorTypeGuard<T, S>): S|undefined;
-      (predicate: ValueIterateeCustom<T, boolean>): T|undefined;
-  }
-  type LodashFind2x1<T> = (collection: ArrayLike<T> | object | null | undefined) => T|undefined;
-  type LodashFind3x1<T, S> = (collection: T | null | undefined) => S|undefined;
-  interface LodashFind3x2<T> {
-      <S extends T[keyof T]>(predicate: NoCapValueIteratorTypeGuard<T[keyof T], S>): S|undefined;
-      (predicate: ValueIterateeCustom<T[keyof T], boolean>): T[keyof T]|undefined;
-  }
+  type IterateePredicate<T> = (value: T, index: number) => boolean
 
-  type NoCapValueIteratorTypeGuard<T, S extends T> =
-    (value: T, iterator: number, xs: ArrayLike<T>) => value is S
-  type ValueIterateeCustom<T, TResult> =
-    string | number | symbol | ((value: T) => TResult)
-    | [string | number | symbol, any] | PartialDeep<T>
-  type PartialDeep<T> = { [P in keyof T]?: PartialDeep<T[P]> | undefined }
+  export function findIndexed<T, K extends Key>(
+    predicate: IterateePredicate<T>, collection: T[]
+  ): T | undefined
+  export function findIndexed<T, K extends Key>(
+    predicate: IterateePredicate<T>): (collection: T[]
+  ) => T | undefined
+
 
   // export function eachIndexed
 
@@ -1002,13 +969,14 @@ traverse -> (pre, post=_.noop) -> tree -> x
    * `traversal` functions are passed the current node as well as the parent
    * stack (where `parents[0]` is the direct parent).
    */
-  export function walk<T>(next?: Function): (
-//    pre: (tree, index, parents?: any[], parentIndexes?: any[]) => T,
-//    post?: (tree, index, parents?: any, parentIndexes?: any[]) => T,
-    parents?: any[],
-    parentIndexes?: any[]
-  ) => (tree: any, index: any) => T
+  export function walk<T>(next?: Function | typeof traverse): (
+    pre: WalkFunction<T>,
+    post?: WalkFunction<T>,
+    parents?: T[],
+    parentIndexes?: number[]
+  ) => (tree: T, index: number) => T | false
 
+  type WalkFunction<T> = (tree: T, index: number, parents?: T[], parentIndexes?: number[]) => T | false
 
   /**
 ```
