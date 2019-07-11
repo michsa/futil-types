@@ -854,6 +854,13 @@ f -> x -> bool
 
   // export function stampKey
 
+  /* something like this (note: lodash seems to object if you specify anything but
+    `any[]` for the args of the functions passed to _.over; will need to find a
+    way around that if we move this to first-party)
+    mergeOverAll<A extends unknown[], K extends Key>(
+      fns: _.Many<(...xs: A) => {[k in K]: any}>
+    ): (...xs: A) => {[k in K]: any}
+  */
 
 /*
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
